@@ -1,1101 +1,316 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="en" data-theme="light">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Memory Book - School Trip Experience</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;500;600;700&family=Crimson+Text:wght@400;600;700&family=Playfair+Display:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
-    <style>
-        :root {
-            --theme-vintage: #8B4513;
-            --theme-amber: #FF8C00;
-            --theme-sepia: #704214;
-            --theme-blossom: #E75480;
-            --paper-yellow: #F5E8C7;
-            --paper-cream: #FFF8DC;
-            --paper-aged: #F2E6CE;
-            --ink-brown: #5D4037;
-            --ink-dark: #3E2723;
-            --accent-gold: #D4AF37;
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Watch purified YouTube videos with no ads. Just focus." />
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+  <title>purify video – watch purified YouTube videos with no ads</title>
+
+  <!-- ✅ Google Font: Noto Sans. -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600&display=swap" rel="stylesheet" />
+
+  <!-- ✅ Google Material Icons: Light Mode & Dark Mode. -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+
+  <style>
+    /* ===================
+       Colors palette.
+    ====================== */
+    :root {
+      --bg-light: #f4f4f5;
+      --text-light: #1f1f1f;
+      --bg-dark: #1e1e20;
+      --text-dark: #dcdcdc;
+      --primary: #46aae9;
+      --input-bg: #ffffff;
+      --input-border: #ced4da;
+    }
+
+    /* ===================
+       Themes.
+    ====================== */
+    [data-theme="dark"] {
+      background-color: var(--bg-dark);
+      color: var(--text-dark);
+    }
+
+    [data-theme="light"] {
+      background-color: var(--bg-light);
+      color: var(--text-light);
+    }
+
+    /* ===================
+       Fonts.
+    ====================== */
+    * {
+      box-sizing: border-box;
+      font-family: 'Noto Sans', 'Segoe UI', Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    /* ===================
+       Layout.
+    ====================== */
+    header, footer, section {
+      max-width: 1200px;
+      margin: auto;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    .iframe {
+      max-width: 100%;
+      aspect-ratio: 16 / 9;
+      padding: 1rem;
+      display: none;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    /* ===================
+       Input and buttons.
+    ====================== */
+    input[type="text"] {
+      padding: 0.5rem;
+      font-size: 1rem;
+      border-radius: 0.25rem;
+      border: 1px solid var(--input-border);
+      background-color: var(--input-bg);
+      color: var(--text-light);
+    }
+
+    button {
+      margin-left: 0.5rem;
+      padding: 0.5rem 1rem;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 0.25rem;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: underline;
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+      border-bottom: 1px solid #ccc;
+    }
+
+    /* ===================
+       Responsive.
+    ====================== */
+    @media (max-width: 600px) {
+      input[type="text"], button {
+        display: block;
+        width: 100%;
+        margin: 0.5rem 0;
+      }
+    }
+
+    /* ==========================
+       Toggle switch with icons.
+    ============================= */
+    .theme-toggle {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      display: flex;
+      align-items: center;
+    }
+
+    .icon-label {
+      font-family: 'Material Symbols Outlined', Arial, sans-serif;
+      font-size: 24px;
+      margin: 0 0.5rem;
+      line-height: 1;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 48px;
+      height: 24px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      border-radius: 24px;
+      transition: 0.4s;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 2px;
+      bottom: 2px;
+      background-color: white;
+      border-radius: 50%;
+      transition: 0.4s;
+    }
+
+    input:checked + .slider {
+      background-color: #666;
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(24px);
+    }
+
+    /* Fallback icons. */
+    .fallback-icon {
+      display: none;
+      font-size: 16px;
+    }
+
+    .material-symbols-outlined:empty + .fallback-icon {
+      display: inline;
+    }
+  </style>
+
+  <script>
+    /**
+     * Set theme based on system.
+     */
+    function setThemeFromPreference() {
+      const saved = localStorage.getItem("theme");
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      const theme = saved || (prefersDark ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", theme);
+      document.getElementById("theme-checkbox").checked = theme === "dark";
+    }
+
+    /**
+     * Change the theme and save on localStorage.
+     */
+    function toggleTheme() {
+      const isDark = document.getElementById("theme-checkbox").checked;
+      const newTheme = isDark ? "dark" : "light";
+      document.documentElement.setAttribute("data-theme", newTheme);
+      localStorage.setItem("theme", newTheme);
+    }
+
+    /**
+		 * Extract key from URL and start video player.
+     */
+    function purify(path, params) {
+      document.querySelector('.iframe').style.display = 'block';
+      document.querySelector('iframe').setAttribute('src', 'https://www.youtube-nocookie.com/embed/' + path + '?' + params.toString());
+    }
+
+    /**
+     * Autostart on onload event.
+     */
+    function init() {
+      setThemeFromPreference();
+      const params = new URLSearchParams(window.location.search.substring(1));
+      if (params.has('v')) {
+        const url = new URL(params.get('v'));
+        const urlParams = new URLSearchParams(url.search.substring(1));
+        // See https://developers.google.com/youtube/player_parameters for supported parameters
+        const outputParams = new URLSearchParams();
+
+        if (urlParams.has('t')) {
+          outputParams.append('start', urlParams.get('t'));
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        if (url.hostname == 'youtube.com' || url.hostname.endsWith('.youtube.com')) {
+          if (urlParams.has('list')) {
+            outputParams.append('listType', 'playlist');
+            outputParams.append('list', urlParams.get('list'));
+          }
+
+          let id = '';
+          if (urlParams.has('v')) {
+            id = urlParams.get('v');
+          }
+          purify(id, outputParams);
+        } else if (url.hostname == 'youtu.be') {
+          const id = url.pathname.substring(1);
+          purify(id, outputParams);
         }
+      }
+    }
 
-        body {
-            font-family: 'Crimson Text', serif;
-            background-color: #F9F5EB;
-            color: var(--ink-brown);
-            line-height: 1.8;
-            overflow-x: hidden;
-            background-image: 
-                radial-gradient(circle at 10% 20%, rgba(255, 248, 220, 0.3) 0%, transparent 20%),
-                radial-gradient(circle at 90% 80%, rgba(245, 232, 199, 0.4) 0%, transparent 20%);
-            position: relative;
-        }
-
-        body::before {
-            content: "";
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23d4af37' fill-opacity='0.05' fill-rule='evenodd'/%3E%3C/svg%3E");
-            opacity: 0.4;
-            z-index: -1;
-            pointer-events: none;
-        }
-
-        /* Vintage Theme Selector */
-        .theme-selector {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-            background: var(--paper-cream);
-            border-radius: 30px;
-            padding: 12px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            display: flex;
-            gap: 10px;
-            border: 1px solid var(--accent-gold);
-            backdrop-filter: blur(5px);
-        }
-
-        .theme-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            border: 2px solid transparent;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1rem;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .theme-btn::after {
-            content: '';
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: rgba(255,255,255,0.1);
-            border-radius: 50%;
-            transform: scale(0);
-            transition: transform 0.3s ease;
-        }
-
-        .theme-btn:hover::after {
-            transform: scale(1);
-        }
-
-        .theme-btn.vintage { background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%); }
-        .theme-btn.amber { background: linear-gradient(135deg, #FF8C00 0%, #FFA500 100%); }
-        .theme-btn.sepia { background: linear-gradient(135deg, #704214 0%, #8B7355 100%); }
-        .theme-btn.blossom { background: linear-gradient(135deg, #E75480 0%, #FF69B4 100%); }
-
-        .theme-btn.active {
-            transform: scale(1.1);
-            box-shadow: 0 0 0 3px var(--accent-gold), 0 0 15px rgba(212, 175, 55, 0.5);
-            border-color: white;
-        }
-
-        .theme-btn i {
-            filter: drop-shadow(0 2px 2px rgba(0,0,0,0.3));
-        }
-
-        /* Memory Book Container */
-        .memory-book {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 40px 20px;
-            position: relative;
-        }
-
-        /* Cover Page */
-        .cover-page {
-            background: var(--paper-cream);
-            border-radius: 8px;
-            padding: 60px 40px;
-            margin-bottom: 60px;
-            box-shadow: 
-                0 10px 30px rgba(0, 0, 0, 0.1),
-                inset 0 0 0 1px var(--accent-gold),
-                inset 0 0 50px rgba(212, 175, 55, 0.1);
-            position: relative;
-            overflow: hidden;
-            border: 1px solid #E6D3A7;
-            transform: perspective(1000px) rotateY(-2deg);
-            transition: transform 0.5s ease;
-        }
-
-        .cover-page:hover {
-            transform: perspective(1000px) rotateY(0deg);
-        }
-
-        .cover-page::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 5px;
-            background: linear-gradient(90deg, var(--accent-gold), #FFD700, var(--accent-gold));
-        }
-
-        .cover-title {
-            font-family: 'Dancing Script', cursive;
-            font-size: 4.5rem;
-            text-align: center;
-            color: var(--ink-dark);
-            margin-bottom: 20px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
-            position: relative;
-        }
-
-        .cover-title::after {
-            content: "";
-            position: absolute;
-            bottom: -15px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 200px;
-            height: 3px;
-            background: linear-gradient(90deg, transparent, var(--accent-gold), transparent);
-        }
-
-        .cover-subtitle {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.5rem;
-            text-align: center;
-            color: var(--ink-brown);
-            margin-bottom: 40px;
-            font-style: italic;
-            letter-spacing: 2px;
-        }
-
-        .cover-image {
-            width: 200px;
-            height: 200px;
-            margin: 30px auto;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--paper-yellow), var(--paper-cream));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 8px solid var(--accent-gold);
-            box-shadow: 
-                0 0 0 10px rgba(212, 175, 55, 0.2),
-                0 10px 30px rgba(0, 0, 0, 0.2);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .cover-image i {
-            font-size: 5rem;
-            color: var(--accent-gold);
-            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.2));
-        }
-
-        .cover-image::before {
-            content: "";
-            position: absolute;
-            top: -10px;
-            left: -10px;
-            right: -10px;
-            bottom: -10px;
-            border: 2px dashed rgba(212, 175, 55, 0.5);
-            border-radius: 50%;
-            animation: rotate 20s linear infinite;
-        }
-
-        @keyframes rotate {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .cover-date {
-            text-align: center;
-            font-size: 1.2rem;
-            color: var(--ink-brown);
-            margin-top: 30px;
-            padding: 10px 30px;
-            background: rgba(212, 175, 55, 0.1);
-            display: inline-block;
-            border-radius: 30px;
-            border: 1px dashed var(--accent-gold);
-        }
-
-        /* Memory Pages */
-        .memory-page {
-            background: var(--paper-cream);
-            border-radius: 8px;
-            padding: 50px 40px;
-            margin-bottom: 60px;
-            box-shadow: 
-                0 10px 30px rgba(0, 0, 0, 0.1),
-                inset 0 0 0 1px rgba(212, 175, 55, 0.3);
-            position: relative;
-            border: 1px solid #E6D3A7;
-            transform-style: preserve-3d;
-            transform: perspective(1000px) rotateY(-1deg);
-            transition: transform 0.5s ease, box-shadow 0.3s ease;
-            page-break-inside: avoid;
-        }
-
-        .memory-page:nth-child(even) {
-            transform: perspective(1000px) rotateY(1deg);
-        }
-
-        .memory-page:hover {
-            transform: perspective(1000px) rotateY(0deg);
-            box-shadow: 
-                0 15px 40px rgba(0, 0, 0, 0.15),
-                inset 0 0 0 1px rgba(212, 175, 55, 0.5);
-        }
-
-        .memory-page::before {
-            content: "";
-            position: absolute;
-            top: 20px;
-            bottom: 20px;
-            left: 40px;
-            width: 2px;
-            background: linear-gradient(to bottom, transparent, var(--accent-gold), transparent);
-        }
-
-        .page-number {
-            position: absolute;
-            bottom: 20px;
-            right: 30px;
-            font-size: 0.9rem;
-            color: var(--accent-gold);
-            font-family: 'Playfair Display', serif;
-        }
-
-        .page-title {
-            font-family: 'Dancing Script', cursive;
-            font-size: 3rem;
-            color: var(--ink-dark);
-            margin-bottom: 30px;
-            padding-left: 50px;
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
-
-        .page-title i {
-            margin-right: 20px;
-            color: var(--accent-gold);
-            font-size: 2.5rem;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
-        }
-
-        .page-content {
-            padding-left: 50px;
-            font-size: 1.2rem;
-            line-height: 1.9;
-            text-align: justify;
-            hyphens: auto;
-        }
-
-        .memory-highlight {
-            background: linear-gradient(120deg, rgba(212, 175, 55, 0.1) 0%, transparent 100%);
-            padding: 25px 30px;
-            margin: 25px 0;
-            border-left: 4px solid var(--accent-gold);
-            border-radius: 0 10px 10px 0;
-            font-style: italic;
-            position: relative;
-            box-shadow: inset 0 0 20px rgba(212, 175, 55, 0.05);
-        }
-
-        .memory-highlight::before {
-            content: "❝";
-            position: absolute;
-            top: -15px;
-            left: 15px;
-            font-size: 3rem;
-            color: var(--accent-gold);
-            opacity: 0.5;
-            font-family: serif;
-        }
-
-        /* Polaroid Photos */
-        .polaroid-gallery {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 30px;
-            margin: 40px 0;
-            padding-left: 50px;
-            justify-content: center;
-        }
-
-        .polaroid {
-            width: 220px;
-            background: white;
-            padding: 15px 15px 40px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            transform: rotate(var(--rotate));
-            transition: transform 0.5s ease;
-            position: relative;
-        }
-
-        .polaroid:hover {
-            transform: rotate(0deg) scale(1.05);
-            z-index: 10;
-        }
-
-        .polaroid:nth-child(odd) { --rotate: -2deg; }
-        .polaroid:nth-child(even) { --rotate: 2deg; }
-
-        .polaroid img {
-            width: 100%;
-            height: 160px;
-            object-fit: cover;
-            filter: sepia(0.3) contrast(1.1);
-            border: 1px solid #ddd;
-        }
-
-        .polaroid-caption {
-            text-align: center;
-            font-family: 'Crimson Text', serif;
-            font-size: 0.95rem;
-            margin-top: 15px;
-            color: var(--ink-brown);
-            padding-top: 10px;
-            border-top: 1px dashed #ddd;
-        }
-
-        .polaroid::after {
-            content: "";
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            width: 40px;
-            height: 40px;
-            background: rgba(212, 175, 55, 0.1);
-            border-radius: 50%;
-            z-index: -1;
-        }
-
-        /* Memory Tokens */
-        .memory-tokens {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            margin: 30px 0;
-            padding-left: 50px;
-        }
-
-        .token {
-            background: rgba(212, 175, 55, 0.1);
-            padding: 10px 20px;
-            border-radius: 30px;
-            border: 1px solid rgba(212, 175, 55, 0.3);
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s ease;
-            cursor: default;
-        }
-
-        .token:hover {
-            background: rgba(212, 175, 55, 0.2);
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .token i {
-            color: var(--accent-gold);
-        }
-
-        /* Timeline */
-        .memory-timeline {
-            position: relative;
-            margin: 50px 0;
-            padding-left: 50px;
-        }
-
-        .timeline-item {
-            position: relative;
-            padding-left: 40px;
-            margin-bottom: 40px;
-        }
-
-        .timeline-item::before {
-            content: "";
-            position: absolute;
-            left: 0;
-            top: 10px;
-            width: 15px;
-            height: 15px;
-            background: var(--accent-gold);
-            border-radius: 50%;
-            border: 3px solid var(--paper-cream);
-            box-shadow: 0 0 0 3px var(--accent-gold);
-        }
-
-        .timeline-item::after {
-            content: "";
-            position: absolute;
-            left: 6px;
-            top: 25px;
-            bottom: -40px;
-            width: 3px;
-            background: linear-gradient(to bottom, var(--accent-gold), transparent);
-        }
-
-        .timeline-item:last-child::after {
-            display: none;
-        }
-
-        .timeline-time {
-            font-family: 'Playfair Display', serif;
-            font-weight: 700;
-            color: var(--ink-dark);
-            font-size: 1.1rem;
-            margin-bottom: 5px;
-        }
-
-        .timeline-content {
-            font-size: 1.1rem;
-            color: var(--ink-brown);
-        }
-
-        /* Thank You Page */
-        .thank-you-page {
-            background: linear-gradient(135deg, rgba(139, 69, 19, 0.05) 0%, rgba(212, 175, 55, 0.05) 100%);
-            text-align: center;
-            padding: 70px 40px;
-            border-top: 5px solid var(--accent-gold);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .thank-you-page::before {
-            content: "✦";
-            position: absolute;
-            font-size: 10rem;
-            color: rgba(212, 175, 55, 0.1);
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 0;
-        }
-
-        .thank-you-title {
-            font-family: 'Dancing Script', cursive;
-            font-size: 4rem;
-            color: var(--ink-dark);
-            margin-bottom: 30px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .thank-you-message {
-            font-size: 1.4rem;
-            max-width: 800px;
-            margin: 0 auto 40px;
-            position: relative;
-            z-index: 1;
-            line-height: 1.9;
-        }
-
-        .signature {
-            font-family: 'Dancing Script', cursive;
-            font-size: 2.5rem;
-            color: var(--ink-dark);
-            margin-top: 40px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .signature::before {
-            content: "";
-            position: absolute;
-            top: 50%;
-            left: -100px;
-            right: -100px;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, var(--accent-gold), transparent);
-        }
-
-        /* Decorative Elements */
-        .corner-decoration {
-            position: absolute;
-            width: 60px;
-            height: 60px;
-            border: 2px solid var(--accent-gold);
-            opacity: 0.3;
-        }
-
-        .top-left { top: 20px; left: 20px; border-right: none; border-bottom: none; }
-        .top-right { top: 20px; right: 20px; border-left: none; border-bottom: none; }
-        .bottom-left { bottom: 20px; left: 20px; border-right: none; border-top: none; }
-        .bottom-right { bottom: 20px; right: 20px; border-left: none; border-top: none; }
-
-        .page-crease {
-            position: absolute;
-            top: 0;
-            left: 50px;
-            width: 1px;
-            height: 100%;
-            background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.05), transparent);
-        }
-
-        /* Falling Memories Animation */
-        .falling-memories {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: -1;
-        }
-
-        .memory-flake {
-            position: absolute;
-            top: -50px;
-            font-size: 1.5rem;
-            opacity: 0.1;
-            color: var(--accent-gold);
-            animation: fall linear infinite;
-        }
-
-        @keyframes fall {
-            to { transform: translateY(100vh) rotate(360deg); }
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .cover-title { font-size: 3rem; }
-            .page-title { font-size: 2.5rem; padding-left: 30px; }
-            .page-content { padding-left: 30px; }
-            .polaroid-gallery { padding-left: 30px; }
-            .memory-tokens { padding-left: 30px; }
-            .memory-timeline { padding-left: 30px; }
-            .theme-selector { top: 10px; right: 10px; padding: 8px; }
-            .polaroid { width: 180px; }
-        }
-
-        @media (max-width: 480px) {
-            .cover-title { font-size: 2.5rem; }
-            .cover-subtitle { font-size: 1.2rem; }
-            .memory-page { padding: 30px 20px; }
-            .polaroid { width: 150px; padding: 10px 10px 30px; }
-            .thank-you-title { font-size: 2.8rem; }
-        }
-    </style>
+    window.onload = init;
+  </script>
 </head>
+
 <body>
-    <!-- Theme Selector -->
-    <div class="theme-selector">
-        <button class="theme-btn vintage active" data-theme="vintage" title="Vintage Theme">
-            <i class="fas fa-book-open"></i>
-        </button>
-        <button class="theme-btn amber" data-theme="amber" title="Amber Theme">
-            <i class="fas fa-leaf"></i>
-        </button>
-        <button class="theme-btn sepia" data-theme="sepia" title="Sepia Theme">
-            <i class="fas fa-feather-alt"></i>
-        </button>
-        <button class="theme-btn blossom" data-theme="blossom" title="Blossom Theme">
-            <i class="fas fa-heart"></i>
-        </button>
-    </div>
+  <!-- 🌗 Toggle Switch for Dark/Light mode with fallback icons. -->
+  <div class="theme-toggle">
+    <span class="icon-label">
+      <span class="material-symbols-outlined">light_mode</span>
+      <span class="fallback-icon">☀️</span>
+    </span>
+    <label class="switch">
+      <input type="checkbox" id="theme-checkbox" onchange="toggleTheme()" />
+      <span class="slider"></span>
+    </label>
+    <span class="icon-label">
+      <span class="material-symbols-outlined">dark_mode</span>
+      <span class="fallback-icon">🌙</span>
+    </span>
+  </div>
 
-    <!-- Falling Memories -->
-    <div class="falling-memories" id="fallingMemories"></div>
+  <header>
+    <h1>purify video</h1>
+    <h2>Watch purified YouTube videos with no ads. Just focus</h2>
+    <form method="get" action="">
+      <input type="text" name="v" placeholder="Enter YouTube URL" />
+      <button type="submit">Purify</button>
+    </form>
+  </header>
 
-    <!-- Memory Book -->
-    <div class="memory-book">
-        <!-- Cover Page -->
-        <div class="cover-page animate__animated animate__fadeIn">
-            <div class="corner-decoration top-left"></div>
-            <div class="corner-decoration top-right"></div>
-            <div class="corner-decoration bottom-left"></div>
-            <div class="corner-decoration bottom-right"></div>
-            
-            <h1 class="cover-title">Memories of a Day</h1>
-            <p class="cover-subtitle">A School Trip to Remember</p>
-            
-            <div class="cover-image">
-                <i class="fas fa-bus-school"></i>
-            </div>
-            
-            <p style="text-align: center; font-size: 1.3rem; max-width: 600px; margin: 30px auto;">
-                Preserved in these pages are the moments, laughter, and discoveries<br>
-                from a remarkable journey through Islamabad's treasures
-            </p>
-            
-            <div style="text-align: center;">
-                <span class="cover-date">
-                    <i class="far fa-calendar-alt"></i> 
-                    &nbsp;March 15, 2023 &nbsp;•&nbsp; 
-                    <i class="far fa-clock"></i> 7:15 AM onwards
-                </span>
-            </div>
-            
-            <div style="text-align: center; margin-top: 40px;">
-                <button id="openBookBtn" style="
-                    background: linear-gradient(135deg, var(--accent-gold), #FFD700);
-                    border: none;
-                    padding: 15px 40px;
-                    border-radius: 30px;
-                    color: var(--ink-dark);
-                    font-family: 'Playfair Display', serif;
-                    font-size: 1.2rem;
-                    cursor: pointer;
-                    box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3);
-                    transition: all 0.3s ease;
-                ">
-                    <i class="fas fa-book-reader"></i> Turn the Page
-                </button>
-            </div>
-        </div>
+  <section class="iframe">
+    <iframe src="" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+  </section>
 
-        <!-- Page 1: Faisal Masjid -->
-        <div class="memory-page animate__animated" id="page1">
-            <div class="page-crease"></div>
-            <div class="page-number">1</div>
-            
-            <h2 class="page-title">
-                <i class="fas fa-mosque"></i> Faisal Masjid
-            </h2>
-            
-            <div class="page-content">
-                <p>Our day began at the break of dawn, the school bus humming with excitement as we approached the majestic Faisal Masjid. The morning air was crisp and cold, carrying the scent of pine from the surrounding Margalla Hills.</p>
-                
-                <div class="memory-highlight">
-                    I remember the shock of cold marble under my bare feet as we entered the prayer hall, and how that discomfort faded when I looked up at the stunning architecture stretching toward the heavens. The silence inside was profound—a peaceful quiet that seemed to absorb all the noise of the outside world.
-                </div>
-                
-                <p>We wandered through the vast courtyards, our whispers echoing softly. I took photos with friends, trying to capture the grandeur of the white marble against the clear blue sky. The mountains stood as silent guardians around us, and for a moment, I understood what true peace felt like.</p>
-                
-                <div class="polaroid-gallery">
-                    <div class="polaroid">
-                        <img src="https://images.unsplash.com/photo-1587135941948-670b381f08ce?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80" alt="Faisal Masjid">
-                        <div class="polaroid-caption">Morning at the mosque</div>
-                    </div>
-                    <div class="polaroid">
-                        <img src="https://images.unsplash.com/photo-1548013146-72479768bada?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=60" alt="Friends at mosque">
-                        <div class="polaroid-caption">Friends forever</div>
-                    </div>
-                </div>
-                
-                <div class="memory-tokens">
-                    <div class="token"><i class="fas fa-snowflake"></i> Cold marble floors</div>
-                    <div class="token"><i class="fas fa-mountain"></i> Mountain views</div>
-                    <div class="token"><i class="fas fa-wind"></i> Fresh mountain air</div>
-                    <div class="token"><i class="fas fa-camera"></i> Group photos</div>
-                </div>
-            </div>
-        </div>
+  <section>
+    <h1>Are you looking for a way to enhance your YouTube viewing experience?</h1>
+    <p>This app offers a clean and minimalistic interface for a distraction-free experience.</p>
+    <p>Teachers, students, parents, and organizers can use our app to remove ads, comments, and distracting sidebar videos.</p>
+    <p>Ensure your viewers see only the content you want them to see—nothing more, nothing less.</p>
+  </section>
 
-        <!-- Page 2: Lok Virsa Museum -->
-        <div class="memory-page animate__animated" id="page2">
-            <div class="page-crease"></div>
-            <div class="page-number">2</div>
-            
-            <h2 class="page-title">
-                <i class="fas fa-landmark"></i> Lok Virsa Museum
-            </h2>
-            
-            <div class="page-content">
-                <p>From spiritual serenity, we stepped into the corridors of history at Lok Virsa Museum. The air here smelled different—dusty, ancient, filled with stories waiting to be heard.</p>
-                
-                <div class="memory-highlight">
-                    My fingers hovered over the glass cases, tracing the outlines of tools used centuries ago. The statues of emperors seemed to watch us pass, their stone eyes holding secrets of empires long faded. I felt connected to generations I would never meet.
-                </div>
-                
-                <p>The artifacts from Mohenjo-daro fascinated me most—delicate pottery, intricate jewelry, evidence of a civilization that understood beauty and function. Our history teacher pointed out details I would have missed, bringing the past to life with her stories.</p>
-                
-                <div class="memory-timeline">
-                    <div class="timeline-item">
-                        <div class="timeline-time">10:30 AM</div>
-                        <div class="timeline-content">Entered the museum, overwhelmed by the collection</div>
-                    </div>
-                    <div class="timeline-item">
-                        <div class="timeline-time">11:15 AM</div>
-                        <div class="timeline-content">Found the Mohenjo-daro exhibit - absolutely mesmerizing</div>
-                    </div>
-                    <div class="timeline-item">
-                        <div class="timeline-time">11:45 AM</div>
-                        <div class="timeline-content">Traditional musical instruments demonstration</div>
-                    </div>
-                </div>
-                
-                <div class="memory-tokens">
-                    <div class="token"><i class="fas fa-history"></i> Ancient artifacts</div>
-                    <div class="token"><i class="fas fa-dharmachakra"></i> Mohenjo-daro relics</div>
-                    <div class="token"><i class="fas fa-guitar"></i> Traditional music</div>
-                    <div class="token"><i class="fas fa-book"></i> Living history</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Page 3: Science Museum -->
-        <div class="memory-page animate__animated" id="page3">
-            <div class="page-crease"></div>
-            <div class="page-number">3</div>
-            
-            <h2 class="page-title">
-                <i class="fas fa-flask"></i> Science Museum
-            </h2>
-            
-            <div class="page-content">
-                <p>As a chemistry enthusiast, this was my promised land. The Science Museum welcomed us with a giant periodic table display, and my heart actually skipped a beat.</p>
-                
-                <div class="memory-highlight">
-                    I stood before the element displays—actual samples of copper, iron, sulfur—elements I'd only seen as symbols in textbooks. Touching the cool surface of the copper sample, I felt science become real in a way no classroom lesson ever achieved.
-                </div>
-                
-                <p>We moved through exhibits showing Earth's layers, fossil fuels, and animal skeletons. The whale skeleton hanging from the ceiling took my breath away—such scale, such history contained in those bones.</p>
-                
-                <div class="polaroid-gallery">
-                    <div class="polaroid">
-                        <img src="https://images.unsplash.com/photo-1532094349884-543bc11b234d?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80" alt="Periodic table">
-                        <div class="polaroid-caption">Elements come alive</div>
-                    </div>
-                    <div class="polaroid">
-                        <img src="https://images.unsplash.com/photo-1563089145-599997674d42?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80" alt="Skeleton exhibit">
-                        <div class="polaroid-caption">Whale of a time!</div>
-                    </div>
-                </div>
-                
-                <p>My friends and I spent twenty minutes at the physics demonstration area, playing with levers and pulleys, laughing as we tried to lift each other with different mechanical advantages.</p>
-            </div>
-        </div>
-
-        <!-- Page 4: Ayub Park -->
-        <div class="memory-page animate__animated" id="page4">
-            <div class="page-crease"></div>
-            <div class="page-number">4</div>
-            
-            <h2 class="page-title">
-                <i class="fas fa-tree"></i> Ayub Park
-            </h2>
-            
-            <div class="page-content">
-                <p>By early afternoon, our minds were full and our feet were tired. Ayub Park spread before us like a green oasis, and we practically tumbled off the bus in our eagerness to rest on the grass.</p>
-                
-                <div class="memory-highlight">
-                    There's something magical about sharing food outdoors. The simple sandwiches and juice boxes tasted like a feast as we sat in circles on the grass, trading stories about our favorite exhibits. The teachers moved between groups, checking on everyone, their faces relaxed and smiling.
-                </div>
-                
-                <p>We sprawled on the grass, some napping, some still buzzing with energy. I lay back and watched clouds drift across the sky, thinking about how much we'd seen in just one morning.</p>
-                
-                <div class="memory-tokens">
-                    <div class="token"><i class="fas fa-utensils"></i> Shared lunch</div>
-                    <div class="token"><i class="fas fa-cloud"></i> Cloud watching</div>
-                    <div class="token"><i class="fas fa-grass"></i> Soft green grass</div>
-                    <div class="token"><i class="fas fa-laugh"></i> Uncontrollable laughter</div>
-                </div>
-                
-                <p>That hour in the park wasn't just a break—it was when we processed everything we'd experienced, turning facts and sights into shared memories.</p>
-            </div>
-        </div>
-
-        <!-- Page 5: Joy Land -->
-        <div class="memory-page animate__animated" id="page5">
-            <div class="page-crease"></div>
-            <div class="page-number">5</div>
-            
-            <h2 class="page-title">
-                <i class="fas fa-ferris-wheel"></i> Joy Land
-            </h2>
-            
-            <div class="page-content">
-                <p>If the morning was for learning and the afternoon for reflection, evening was for pure, unadulterated joy. Joy Land welcomed us with carnival music and the smell of popcorn.</p>
-                
-                <div class="memory-highlight">
-                    The upside-down ride—oh, that terrifying, wonderful contraption! Strapped in beside my bravest friend, we screamed until our voices cracked as the world flipped and spun. For those two minutes, we weren't students on a trip; we were adventurers, astronauts, warriors against gravity itself.
-                </div>
-                
-                <div class="polaroid-gallery">
-                    <div class="polaroid">
-                        <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80" alt="Thrill ride">
-                        <div class="polaroid-caption">Upside down & screaming!</div>
-                    </div>
-                    <div class="polaroid">
-                        <img src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80" alt="Amusement park">
-                        <div class="polaroid-caption">Joy Land adventures</div>
-                    </div>
-                </div>
-                
-                <p>We rode everything we could—bumper cars where we chased each other with gleeful abandon, a gentle ferris wheel that gave us a view of the entire park, and spinning teacups that left us dizzy and laughing.</p>
-                
-                <div class="memory-timeline">
-                    <div class="timeline-item">
-                        <div class="timeline-time">3:30 PM</div>
-                        <div class="timeline-content">Entered Joy Land, bought ride bands</div>
-                    </div>
-                    <div class="timeline-item">
-                        <div class="timeline-time">4:15 PM</div>
-                        <div class="timeline-content">The legendary upside-down ride</div>
-                    </div>
-                    <div class="timeline-item">
-                        <div class="timeline-time">5:00 PM</div>
-                        <div class="timeline-content">Bumper car championships</div>
-                    </div>
-                    <div class="timeline-item">
-                        <div class="timeline-time">5:45 PM</div>
-                        <div class="timeline-content">Last ride as the sun set</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Thank You Page -->
-        <div class="memory-page thank-you-page animate__animated">
-            <div class="corner-decoration top-left"></div>
-            <div class="corner-decoration top-right"></div>
-            <div class="corner-decoration bottom-left"></div>
-            <div class="corner-decoration bottom-right"></div>
-            
-            <h2 class="thank-you-title">With Gratitude</h2>
-            
-            <div class="thank-you-message">
-                <p>This day, woven from moments of wonder, learning, and laughter, will stay with me always. From the sacred silence of Faisal Masjid to the joyful screams at Joy Land, each experience shaped this memory into something precious.</p>
-                
-                <p style="margin-top: 30px; font-size: 1.5rem;">
-                    Thank you to our teachers who planned this journey, who answered our endless questions, who laughed with us and watched over us. You gave us more than a trip—you gave us stories we'll tell for years.
-                </p>
-                
-                <div style="margin: 40px 0;">
-                    <i class="fas fa-heart" style="color: var(--accent-gold); font-size: 2rem; margin: 0 10px;"></i>
-                    <i class="fas fa-star" style="color: var(--accent-gold); font-size: 2rem; margin: 0 10px;"></i>
-                    <i class="fas fa-heart" style="color: var(--accent-gold); font-size: 2rem; margin: 0 10px;"></i>
-                </div>
-            </div>
-            
-            <p class="signature">Forever grateful,</p>
-            <p style="font-size: 1.2rem; margin-top: 10px; position: relative; z-index: 1;">The Students</p>
-            
-            <div style="margin-top: 50px; font-size: 0.9rem; opacity: 0.7; position: relative; z-index: 1;">
-                <p><i class="far fa-calendar-check"></i> March 15, 2023 • A day preserved in memory</p>
-            </div>
-            
-            <button id="backToCoverBtn" style="
-                margin-top: 40px;
-                background: transparent;
-                border: 2px solid var(--accent-gold);
-                padding: 12px 30px;
-                border-radius: 30px;
-                color: var(--ink-dark);
-                font-family: 'Playfair Display', serif;
-                font-size: 1.1rem;
-                cursor: pointer;
-                transition: all 0.3s ease;
-            ">
-                <i class="fas fa-book"></i> Return to Beginning
-            </button>
-        </div>
-    </div>
-
-    <script>
-        // Theme Switching with Nostalgic Effects
-        document.addEventListener('DOMContentLoaded', function() {
-            const themeButtons = document.querySelectorAll('.theme-btn');
-            const body = document.body;
-            
-            // Set initial theme
-            body.classList.add('theme-vintage');
-            
-            themeButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    const theme = this.getAttribute('data-theme');
-                    
-                    // Remove active class from all buttons
-                    themeButtons.forEach(btn => btn.classList.remove('active'));
-                    
-                    // Add active class to clicked button
-                    this.classList.add('active');
-                    
-                    // Remove all theme classes from body
-                    body.className = body.className.replace(/theme-\w+/g, '');
-                    
-                    // Add new theme class
-                    body.classList.add(`theme-${theme}`);
-                    
-                    // Add theme-specific decorative elements
-                    updateThemeDecorations(theme);
-                    
-                    // Store theme preference
-                    localStorage.setItem('memoryBookTheme', theme);
-                });
-            });
-            
-            // Load saved theme
-            const savedTheme = localStorage.getItem('memoryBookTheme') || 'vintage';
-            document.querySelector(`.theme-btn.${savedTheme}`).click();
-            
-            // Create falling memories
-            const fallingMemories = document.getElementById('fallingMemories');
-            const memorySymbols = ['❦', '✿', '❁', '✾', '❃', '✼', '✧', '✦', '❀', '♡'];
-            
-            for (let i = 0; i < 25; i++) {
-                const flake = document.createElement('div');
-                flake.className = 'memory-flake';
-                flake.textContent = memorySymbols[Math.floor(Math.random() * memorySymbols.length)];
-                flake.style.left = Math.random() * 100 + 'vw';
-                flake.style.animationDuration = (Math.random() * 10 + 10) + 's';
-                flake.style.animationDelay = Math.random() * 5 + 's';
-                flake.style.opacity = Math.random() * 0.1 + 0.05;
-                flake.style.fontSize = (Math.random() * 1 + 1) + 'rem';
-                fallingMemories.appendChild(flake);
-            }
-            
-            // Page scroll animations
-            const memoryPages = document.querySelectorAll('.memory-page');
-            const observerOptions = {
-                threshold: 0.1,
-                rootMargin: '0px 0px -100px 0px'
-            };
-            
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('animate__fadeInUp');
-                        setTimeout(() => {
-                            entry.target.style.opacity = '1';
-                        }, 300);
-                    }
-                });
-            }, observerOptions);
-            
-            memoryPages.forEach(page => {
-                page.style.opacity = '0';
-                observer.observe(page);
-            });
-            
-            // Open book button
-            document.getElementById('openBookBtn').addEventListener('click', function() {
-                document.getElementById('page1').scrollIntoView({ 
-                    behavior: 'smooth',
-                    block: 'start'
-                });
-                
-                // Add opening animation
-                this.innerHTML = '<i class="fas fa-book-open"></i> The Story Begins';
-                this.style.transform = 'scale(0.95)';
-                setTimeout(() => {
-                    this.style.transform = 'scale(1)';
-                }, 200);
-            });
-            
-            // Back to cover button
-            document.getElementById('backToCoverBtn').addEventListener('click', function() {
-                document.querySelector('.cover-page').scrollIntoView({ 
-                    behavior: 'smooth',
-                    block: 'start'
-                });
-                
-                this.innerHTML = '<i class="fas fa-home"></i> Back to Memories';
-                this.style.transform = 'scale(0.95)';
-                setTimeout(() => {
-                    this.style.transform = 'scale(1)';
-                }, 200);
-            });
-            
-            // Polaroid hover effects
-            const polaroids = document.querySelectorAll('.polaroid');
-            polaroids.forEach(polaroid => {
-                polaroid.addEventListener('mouseenter', function() {
-                    const allPolaroids = document.querySelectorAll('.polaroid');
-                    allPolaroids.forEach(p => {
-                        if (p !== this) {
-                            p.style.opacity = '0.7';
-                            p.style.transform = `rotate(${p.style.getPropertyValue('--rotate')}) scale(0.95)`;
-                        }
-                    });
-                });
-                
-                polaroid.addEventListener('mouseleave', function() {
-                    const allPolaroids = document.querySelectorAll('.polaroid');
-                    allPolaroids.forEach(p => {
-                        p.style.opacity = '1';
-                        p.style.transform = `rotate(${p.style.getPropertyValue('--rotate')})`;
-                    });
-                });
-            });
-            
-            // Memory tokens hover effect
-            const tokens = document.querySelectorAll('.token');
-            tokens.forEach(token => {
-                token.addEventListener('mouseenter', function() {
-                    this.style.transform = 'translateY(-5px) scale(1.05)';
-                });
-                
-                token.addEventListener('mouseleave', function() {
-                    this.style.transform = 'translateY(0) scale(1)';
-                });
-            });
-            
-            // Theme-specific decorations
-            function updateThemeDecorations(theme) {
-                // Update accent color based on theme
-                const root = document.documentElement;
-                switch(theme) {
-                    case 'vintage':
-                        root.style.setProperty('--accent-gold', '#D4AF37');
-                        break;
-                    case 'amber':
-                        root.style.setProperty('--accent-gold', '#FF8C00');
-                        break;
-                    case 'sepia':
-                        root.style.setProperty('--accent-gold', '#8B7355');
-                        break;
-                    case 'blossom':
-                        root.style.setProperty('--accent-gold', '#E75480');
-                        break;
-                }
-                
-                // Update falling memories color
-                const flakes = document.querySelectorAll('.memory-flake');
-                flakes.forEach(flake => {
-                    flake.style.color = getComputedStyle(root).getPropertyValue('--accent-gold');
-                });
-            }
-            
-            // Add page turning sound effect (optional)
-            const pages = document.querySelectorAll('.memory-page');
-            pages.forEach(page => {
-                page.addEventListener('click', function() {
-                    // Simulate page turn effect
-                    this.style.transform = 'perspective(1000px) rotateY(-5deg)';
-                    setTimeout(() => {
-                        this.style.transform = 'perspective(1000px) rotateY(0deg)';
-                    }, 300);
-                });
-            });
-            
-            // Auto-scroll memory tokens on hover
-            const tokenContainer = document.querySelector('.memory-tokens');
-            if (tokenContainer) {
-                tokenContainer.addEventListener('wheel', function(e) {
-                    if (e.deltaY > 0) {
-                        this.scrollLeft += 50;
-                    } else {
-                        this.scrollLeft -= 50;
-                    }
-                    e.preventDefault();
-                });
-            }
-        });
-    </script>
+  <footer>
+    <p>YouTube is the source of all content</p>
+    <p><a href="https://github.com/purify-video" target="_blank">Made with 🖤 in Wrocław</a></p>
+    <p>This website <strong>does not store</strong> any data such as cookies to enable essential site functionality.</p>
+  </footer>
 </body>
 </html>
