@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>404 - Page Not Found | fwrobby.site</title>
     <style>
-        /* Reset and Base */
+        /* Reset */
         * {
             margin: 0;
             padding: 0;
@@ -13,283 +13,131 @@
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: #111;
             background: #fff;
-            color: #1a1a1a;
             min-height: 100vh;
             display: flex;
+            flex-direction: column;
+        }
+        
+        /* Navigation */
+        .nav {
+            display: flex;
+            justify-content: flex-end;
+            padding: 20px 30px;
+            gap: 25px;
+        }
+        
+        .nav a {
+            text-decoration: none;
+            color: #333;
+            font-size: 15px;
+            font-weight: 500;
+        }
+        
+        .nav a:hover {
+            color: #000;
+        }
+        
+        .divider {
+            height: 1px;
+            background: #eee;
+            width: 100%;
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 20px;
-        }
-        
-        /* Main Container */
-        .container {
-            width: 100%;
-            max-width: 500px;
             text-align: center;
+            padding: 40px 20px;
         }
         
-        /* Error Number */
-        .error-code {
-            font-size: 6rem;
+        .error-404 {
+            font-size: 120px;
             font-weight: 800;
+            color: #111;
             line-height: 1;
-            color: #2d3748;
-            margin-bottom: 1rem;
-            opacity: 0.9;
+            margin-bottom: 30px;
         }
         
-        /* Main Message */
-        .error-title {
-            font-size: 1.75rem;
-            font-weight: 600;
-            color: #2d3748;
-            margin-bottom: 1rem;
-        }
-        
-        .error-message {
-            font-size: 1.1rem;
-            color: #4a5568;
-            line-height: 1.6;
-            margin-bottom: 2.5rem;
+        .message {
+            font-size: 18px;
+            color: #555;
+            line-height: 1.5;
+            max-width: 400px;
         }
         
         .site-name {
             font-weight: 600;
-            color: #2d3748;
-        }
-        
-        /* Error Path */
-        .error-path {
-            background: #f7fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 16px;
-            margin: 2rem 0;
-            font-family: 'Monaco', 'Consolas', monospace;
-            font-size: 0.9rem;
-            color: #4a5568;
-            word-break: break-all;
-            text-align: left;
-        }
-        
-        .error-path span {
-            color: #718096;
-            font-size: 0.85rem;
-            display: block;
-            margin-bottom: 4px;
-        }
-        
-        /* Action Buttons */
-        .actions {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 12px;
-            margin-bottom: 2rem;
-        }
-        
-        @media (min-width: 640px) {
-            .actions {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-        
-        .btn {
-            display: block;
-            padding: 14px 24px;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: 500;
-            font-size: 1rem;
-            transition: all 0.2s ease;
-            border: none;
-            cursor: pointer;
-            text-align: center;
-        }
-        
-        .btn-primary {
-            background: #4299e1;
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background: #3182ce;
-            transform: translateY(-1px);
-        }
-        
-        .btn-secondary {
-            background: #edf2f7;
-            color: #2d3748;
-            border: 1px solid #e2e8f0;
-        }
-        
-        .btn-secondary:hover {
-            background: #e2e8f0;
-            transform: translateY(-1px);
-        }
-        
-        .btn-donate {
-            background: #f56565;
-            color: white;
-        }
-        
-        .btn-donate:hover {
-            background: #e53e3e;
-            transform: translateY(-1px);
-        }
-        
-        /* Quick Links */
-        .quick-links {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 16px;
-            margin-top: 2rem;
-            padding-top: 2rem;
-            border-top: 1px solid #e2e8f0;
-        }
-        
-        .quick-link {
-            color: #4a5568;
-            text-decoration: none;
-            font-size: 0.95rem;
-            padding: 8px 16px;
-            border-radius: 6px;
-            transition: all 0.2s ease;
-        }
-        
-        .quick-link:hover {
-            background: #edf2f7;
-            color: #2d3748;
+            color: #111;
         }
         
         /* Footer */
         .footer {
-            margin-top: 2.5rem;
-            color: #a0aec0;
-            font-size: 0.9rem;
+            padding: 30px 20px;
+            text-align: center;
+            color: #777;
+            font-size: 14px;
+            border-top: 1px solid #eee;
         }
         
-        .footer a {
-            color: #4299e1;
-            text-decoration: none;
+        /* Mobile */
+        @media (max-width: 768px) {
+            .nav {
+                justify-content: center;
+                padding: 20px 15px;
+                gap: 20px;
+            }
+            
+            .error-404 {
+                font-size: 80px;
+            }
+            
+            .message {
+                font-size: 16px;
+            }
         }
         
-        .footer a:hover {
-            text-decoration: underline;
-        }
-        
-        /* Mobile adjustments */
         @media (max-width: 480px) {
-            .error-code {
-                font-size: 4.5rem;
+            .nav {
+                flex-wrap: wrap;
+                gap: 15px;
             }
             
-            .error-title {
-                font-size: 1.5rem;
+            .error-404 {
+                font-size: 70px;
             }
-            
-            .error-message {
-                font-size: 1rem;
-            }
-            
-            .btn {
-                padding: 16px 20px;
-            }
-            
-            .quick-links {
-                gap: 12px;
-            }
-            
-            .quick-link {
-                padding: 8px 12px;
-                font-size: 0.9rem;
-            }
-        }
-        
-        /* Focus states for accessibility */
-        .btn:focus,
-        .quick-link:focus {
-            outline: 2px solid #4299e1;
-            outline-offset: 2px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Error Code -->
-        <div class="error-code">404</div>
-        
-        <!-- Main Message -->
-        <h1 class="error-title">Page not found</h1>
-        <p class="error-message">
+    <!-- Top Navigation -->
+    <nav class="nav">
+        <a href="https://fwrobby.site">Home</a>
+        <a href="https://fwrobby.site/about/">About</a>
+        <a href="https://fwrobby.site/contact/">Contact</a>
+        <a href="https://fwrobby.site/donate/">Donate</a>
+    </nav>
+    
+    <div class="divider"></div>
+    
+    <!-- Main 404 Content -->
+    <main class="main-content">
+        <div class="error-404">404</div>
+        <p class="message">
             The page you're looking for doesn't exist on <span class="site-name">fwrobby.site</span>. 
             It may have been moved or deleted.
         </p>
-        
-        <!-- Error Path Display -->
-        <div class="error-path">
-            <span>You tried to access:</span>
-            <div id="current-path"></div>
-        </div>
-        
-        <!-- Main Actions -->
-        <div class="actions">
-            <a href="https://fwrobby.site" class="btn btn-primary">
-                ← Go to Homepage
-            </a>
-            <button onclick="goBack()" class="btn btn-secondary">
-                Go Back
-            </button>
-            <a href="https://fwrobby.site/donate/" class="btn btn-donate">
-                Donate
-            </a>
-            <a href="https://fwrobby.site/contact/" class="btn btn-secondary">
-                Contact
-            </a>
-        </div>
-        
-        <!-- Quick Links -->
-        <div class="quick-links">
-            <a href="https://fwrobby.site/about/" class="quick-link">About</a>
-            <a href="https://fwrobby.site/contact/" class="quick-link">Contact</a>
-            <a href="https://fwrobby.site/donate/" class="quick-link">Donate</a>
-        </div>
-        
-        <!-- Footer -->
-        <div class="footer">
-            <p>© <span id="current-year"></span> fwrobby.site • <a href="https://fwrobby.site">Home</a></p>
-        </div>
-    </div>
-
-    <script>
-        // Display current URL
-        document.getElementById('current-path').textContent = window.location.href;
-        
-        // Set current year
-        document.getElementById('current-year').textContent = new Date().getFullYear();
-        
-        // Go back function
-        function goBack() {
-            if (document.referrer && document.referrer.includes(window.location.hostname)) {
-                window.history.back();
-            } else {
-                window.location.href = 'https://fwrobby.site';
-            }
-        }
-        
-        // Add keyboard shortcuts
-        document.addEventListener('keydown', function(e) {
-            // Escape key goes back
-            if (e.key === 'Escape') {
-                goBack();
-            }
-            // 'H' key goes home
-            if (e.key === 'h' || e.key === 'H') {
-                window.location.href = 'https://fwrobby.site';
-            }
-        });
-    </script>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="footer">
+        © 2025 Muhammad Asim (Robby). All rights reserved.
+    </footer>
 </body>
 </html>
