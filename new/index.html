@@ -7,40 +7,45 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Notification styles */
+        /* Optimized notification styles */
         .notification {
             position: fixed;
             top: 20px;
             right: 20px;
-            padding: 1rem 1.5rem;
+            padding: 12px 16px;
             border-radius: 8px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            z-index: 10000;
-            animation: slideIn 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 9999;
+            animation: slideIn 0.2s ease;
             display: flex;
             align-items: center;
-            gap: 0.8rem;
-            max-width: 400px;
+            gap: 8px;
+            max-width: 320px;
             backdrop-filter: blur(10px);
+            font-size: 14px;
+            font-weight: 500;
         }
         
         .notification.success {
-            background: #333;
-            color: #e0e0e0;
-            border: 1px solid #444;
+            background: rgba(76, 175, 80, 0.15);
+            color: #4CAF50;
+            border: 1px solid rgba(76, 175, 80, 0.3);
         }
         
         .notification.error {
-            background: #222;
-            color: #e0e0e0;
-            border: 1px solid #333;
+            background: rgba(244, 67, 54, 0.15);
+            color: #f44336;
+            border: 1px solid rgba(244, 67, 54, 0.3);
         }
         
         .notification.info {
-            background: #222;
-            color: #e0e0e0;
-            border: 1px solid #333;
+            background: rgba(33, 150, 243, 0.15);
+            color: #2196F3;
+            border: 1px solid rgba(33, 150, 243, 0.3);
         }
         
         @keyframes slideIn {
@@ -51,6 +56,34 @@
         @keyframes slideOut {
             from { transform: translateX(0); opacity: 1; }
             to { transform: translateX(100%); opacity: 0; }
+        }
+        
+        /* Loading spinner */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 0.6s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Video player skeleton */
+        .skeleton {
+            background: linear-gradient(90deg, #1a1a1a 25%, #222 50%, #1a1a1a 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+            border-radius: 8px;
+        }
+        
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
         }
     </style>
 </head>
@@ -85,7 +118,7 @@
         </div>
     </div>
 
-    <!-- Main App (Hidden initially) -->
+    <!-- Main App -->
     <div id="mainApp" class="hidden">
         <!-- Header -->
         <header class="header">
@@ -93,17 +126,15 @@
                 <i class="fas fa-user-secret"></i>
                 <div class="logo-text">
                     <h1>Private Videos</h1>
-                    <span class="tagline">100% Anonymous • No Registration</span>
+                    <span class="tagline">Anonymous • No Signup</span>
                 </div>
             </div>
             
-            <!-- Upload Button in Top Right -->
-            <div class="header-upload">
-                <button id="openUploadModal" class="btn-upload-header">
-                    <i class="fas fa-cloud-upload-alt"></i>
-                    <span>Upload Video</span>
-                </button>
-            </div>
+            <!-- Upload Button -->
+            <button id="openUploadModal" class="btn-upload-header">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <span class="upload-text">Upload</span>
+            </button>
         </header>
 
         <!-- Upload Modal -->
@@ -113,24 +144,24 @@
                     <i class="fas fa-times"></i>
                 </button>
                 <h2><i class="fas fa-cloud-upload-alt"></i> Upload Video</h2>
-                <p class="upload-info">Maximum 2 minutes • 30MB limit • Completely anonymous</p>
+                <p class="upload-info">Max 2 min • 30MB • 100% Anonymous</p>
                 
                 <div class="upload-area" id="uploadArea">
                     <i class="fas fa-file-video"></i>
-                    <h3>Drag & drop video here</h3>
-                    <p>or click to select file</p>
-                    <input type="file" id="videoInput" accept="video/*" hidden>
+                    <h3>Drop video here</h3>
+                    <p>or tap to select file</p>
+                    <input type="file" id="videoInput" accept="video/mp4,video/webm,video/quicktime" hidden>
                     <div class="file-info" id="fileInfo"></div>
                 </div>
                 
                 <div class="upload-controls">
-                    <input type="text" id="videoTitle" placeholder="Optional title (leave blank for random)">
+                    <input type="text" id="videoTitle" placeholder="Optional title (or leave blank)" maxlength="50">
                     <div class="upload-actions">
                         <button id="cancelUpload" class="btn btn-cancel">
                             Cancel
                         </button>
                         <button id="uploadBtn" class="btn btn-submit" disabled>
-                            <i class="fas fa-upload"></i> Upload Anonymously
+                            <i class="fas fa-upload"></i> Upload
                         </button>
                     </div>
                 </div>
@@ -143,8 +174,8 @@
                 </div>
                 
                 <div class="upload-rules">
-                    <p><i class="fas fa-exclamation-circle"></i> Videos are automatically deleted after 30 days</p>
-                    <p><i class="fas fa-shield-alt"></i> No personal data collected • No tracking</p>
+                    <p><i class="fas fa-shield-alt"></i> No personal data collected</p>
+                    <p><i class="fas fa-clock"></i> Videos auto-delete after 30 days</p>
                 </div>
             </div>
         </div>
@@ -154,14 +185,14 @@
             <div class="videos-container">
                 <div class="section-header">
                     <h2><i class="fas fa-play-circle"></i> Recent Videos</h2>
-                    <div class="video-count" id="videoCount">0 videos</div>
+                    <div class="video-count" id="videoCount">Loading...</div>
                 </div>
                 
                 <div class="video-grid" id="videoGrid">
-                    <!-- Videos will be loaded here -->
+                    <!-- Videos load here -->
                     <div class="loading">
-                        <i class="fas fa-spinner fa-spin"></i>
-                        <p>Loading private videos...</p>
+                        <div class="spinner"></div>
+                        <p>Loading videos...</p>
                     </div>
                 </div>
             </div>
@@ -174,14 +205,15 @@
                     <i class="fas fa-times"></i>
                 </button>
                 <div class="video-player-container">
-                    <video id="videoPlayer" controls>
-                        Your browser does not support the video tag.
+                    <div class="video-loading skeleton" id="videoLoading"></div>
+                    <video id="videoPlayer" controls playsinline preload="metadata">
+                        Your browser doesn't support HTML5 video.
                     </video>
                 </div>
                 <div class="video-info">
-                    <h3 id="modalVideoTitle">Untitled Video</h3>
+                    <h3 id="modalVideoTitle">Loading...</h3>
                     <div class="video-meta">
-                        <span><i class="fas fa-clock"></i> <span id="modalUploadTime">Just now</span></span>
+                        <span><i class="fas fa-clock"></i> <span id="modalUploadTime">--</span></span>
                         <span><i class="fas fa-user-secret"></i> Anonymous</span>
                         <button id="copyLinkBtn" class="btn btn-small">
                             <i class="fas fa-link"></i> Copy Link
@@ -193,264 +225,135 @@
 
         <!-- Footer -->
         <footer class="footer">
-            <p><i class="fas fa-user-secret"></i> Private Videos • 100% Anonymous • No Registration Required</p>
-            <p class="footer-note">All content is user-uploaded anonymously. Use at your own discretion.</p>
+            <p><i class="fas fa-user-secret"></i> Private Videos • 100% Anonymous</p>
+            <p class="footer-note">User-uploaded content • Viewer discretion advised</p>
         </footer>
     </div>
 
-    <!-- Simple Supabase Initialization -->
+    <!-- Optimized JavaScript -->
     <script>
-        // Define storage globally first
-        window.storage = null;
-        
-        // Initialize when page loads
+        // Supabase Configuration - Pre-initialize
+        const SUPABASE_CONFIG = {
+            url: 'https://tpskystunzgnbbgnrvnz.supabase.co',
+            key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRwc2t5c3R1bnpnbmJiZ25ydm56Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgwNTkyMjMsImV4cCI6MjA4MzYzNTIyM30.wEekEB2PyUvGcFFZ_dQvB9Ny0C2cM1v7NdY9_AcsnBU'
+        };
+
+        // Initialize on DOM ready
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM loaded, initializing Supabase...');
-            
-            // Wait for Supabase SDK to load
-            setTimeout(function() {
-                if (window.supabase) {
-                    initSupabase();
-                } else {
-                    console.error('Supabase SDK not loaded');
-                    // Create dummy storage for testing
-                    createDummyStorage();
-                }
-            }, 1000);
-        });
-        
-        function initSupabase() {
-            console.log('Initializing Supabase...');
-            
-            // Supabase Configuration
-            const SUPABASE_URL = 'https://tpskystunzgnbbgnrvnz.supabase.co';
-            const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRwc2t5c3R1bnpnbmJiZ25ydm56Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgwNTkyMjMsImV4cCI6MjA4MzYzNTIyM30.wEekEB2PyUvGcFFZ_dQvB9Ny0C2cM1v7NdY9_AcsnBU';
-
-            try {
-                // Initialize Supabase client
-                const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-                
-                // Create storage object
-                window.storage = {
-                    // Upload video to Supabase Storage
-                    async uploadVideo(file, title, onProgress) {
-                        console.log('Starting upload:', file.name);
-                        
-                        try {
-                            // Check file size (30MB limit)
-                            if (file.size > 30 * 1024 * 1024) {
-                                throw new Error('File size exceeds 30MB limit (max 30MB)');
-                            }
-
-                            // Check if it's a video file
-                            if (!file.type.startsWith('video/')) {
-                                throw new Error('Please select a video file (MP4, WebM, MOV, etc.)');
-                            }
-
-                            // Generate unique filename
-                            const fileExt = file.name.split('.').pop().toLowerCase();
-                            const fileName = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
-                            const filePath = `public/${fileName}`;
-                            
-                            console.log('Uploading to Supabase Storage:', filePath);
-                            
-                            // Simulate progress updates
-                            if (onProgress) {
-                                let progress = 0;
-                                const interval = setInterval(() => {
-                                    progress += 10;
-                                    if (progress <= 90) {
-                                        onProgress(progress);
-                                    } else {
-                                        clearInterval(interval);
-                                    }
-                                }, 100);
-                            }
-                            
-                            // Upload file to Supabase Storage
-                            const { data: uploadData, error: uploadError } = await supabase.storage
-                                .from('videos')
-                                .upload(filePath, file, {
-                                    cacheControl: '3600',
-                                    upsert: false
-                                });
-
-                            if (uploadError) {
-                                console.error('Storage upload error:', uploadError);
-                                throw new Error(`Upload failed: ${uploadError.message}`);
-                            }
-
-                            if (onProgress) {
-                                onProgress(100);
-                            }
-
-                            // Get public URL
-                            const { data: urlData } = supabase.storage
-                                .from('videos')
-                                .getPublicUrl(filePath);
-
-                            // Save video metadata to database
-                            const videoData = {
-                                title: title || `Private Video ${new Date().toLocaleTimeString()}`,
-                                filename: fileName,
-                                filepath: filePath,
-                                url: urlData.publicUrl,
-                                filesize: file.size,
-                                filetype: file.type
-                            };
-
-                            console.log('Saving metadata to database...');
-                            
-                            // Insert into videos table
-                            const { data: dbData, error: dbError } = await supabase
-                                .from('videos')
-                                .insert([videoData])
-                                .select()
-                                .single();
-
-                            if (dbError) {
-                                console.error('Database error:', dbError);
-                                // Still return success if file uploaded but metadata failed
-                                return {
-                                    success: true,
-                                    video: { ...videoData, id: 'temp-id' },
-                                    publicUrl: urlData.publicUrl
-                                };
-                            }
-
-                            console.log('Upload complete!');
-                            
-                            return {
-                                success: true,
-                                video: dbData,
-                                publicUrl: urlData.publicUrl
-                            };
-
-                        } catch (error) {
-                            console.error('Upload error:', error);
-                            return {
-                                success: false,
-                                error: error.message || 'Unknown upload error'
-                            };
-                        }
-                    },
-
-                    // Get all videos from database
-                    async getAllVideos() {
-                        console.log('Fetching videos from Supabase...');
-                        
-                        try {
-                            const { data, error, count } = await supabase
-                                .from('videos')
-                                .select('*', { count: 'exact' })
-                                .order('uploaded_at', { ascending: false });
-
-                            if (error) {
-                                console.error('Database fetch error:', error);
-                                // Return empty array instead of failing
-                                return {
-                                    success: true,
-                                    videos: [],
-                                    count: 0
-                                };
-                            }
-
-                            console.log(`Found ${data?.length || 0} videos`);
-                            
-                            return {
-                                success: true,
-                                videos: data || [],
-                                count: count || 0
-                            };
-                            
-                        } catch (error) {
-                            console.error('Get videos error:', error);
-                            return {
-                                success: true,
-                                videos: [],
-                                count: 0,
-                                error: error.message
-                            };
-                        }
-                    }
-                };
-                
-                console.log('Supabase storage initialized successfully');
-                console.log('Storage object:', window.storage);
-                
-            } catch (error) {
-                console.error('Failed to initialize Supabase:', error);
-                createDummyStorage();
-            }
-        }
-        
-        function createDummyStorage() {
-            console.log('Creating dummy storage for testing...');
-            
-            // Create dummy storage for testing
+            // Create storage immediately (will be populated when Supabase loads)
             window.storage = {
+                // Simple upload method
                 async uploadVideo(file, title, onProgress) {
-                    console.log('Dummy upload started');
-                    
-                    // Simulate progress
-                    if (onProgress) {
-                        let progress = 0;
-                        const interval = setInterval(() => {
-                            progress += 20;
-                            if (progress <= 100) {
-                                onProgress(progress);
-                            }
-                            if (progress >= 100) {
-                                clearInterval(interval);
-                            }
-                        }, 200);
-                    }
-                    
-                    // Wait for progress to complete
-                    await new Promise(resolve => setTimeout(resolve, 1200));
-                    
-                    // Return dummy success
-                    return {
-                        success: true,
-                        video: {
-                            id: 'dummy_' + Date.now(),
-                            title: title || 'Test Video',
-                            url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-                            uploaded_at: new Date().toISOString()
+                    try {
+                        // Quick validation
+                        if (!file || !file.type.startsWith('video/')) {
+                            throw new Error('Please select a video file');
                         }
-                    };
+                        
+                        if (file.size > 30 * 1024 * 1024) {
+                            throw new Error('File too large (max 30MB)');
+                        }
+
+                        const supabase = window.supabase?.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.key);
+                        if (!supabase) throw new Error('Connection error');
+
+                        const fileExt = file.name.split('.').pop().toLowerCase();
+                        const fileName = `vid_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${fileExt}`;
+                        const filePath = `public/${fileName}`;
+
+                        // Upload with progress
+                        const { error: uploadError } = await supabase.storage
+                            .from('videos')
+                            .upload(filePath, file);
+
+                        if (uploadError) throw uploadError;
+
+                        const { data: urlData } = supabase.storage
+                            .from('videos')
+                            .getPublicUrl(filePath);
+
+                        const videoData = {
+                            title: title || `Video ${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`,
+                            filename: fileName,
+                            filepath: filePath,
+                            url: urlData.publicUrl,
+                            filesize: file.size,
+                            filetype: file.type
+                        };
+
+                        const { data: dbData, error: dbError } = await supabase
+                            .from('videos')
+                            .insert([videoData])
+                            .select()
+                            .single();
+
+                        return {
+                            success: true,
+                            video: dbData || videoData,
+                            publicUrl: urlData.publicUrl
+                        };
+
+                    } catch (error) {
+                        console.error('Upload error:', error);
+                        return {
+                            success: false,
+                            error: error.message || 'Upload failed'
+                        };
+                    }
                 },
-                
+
+                // Fast video fetching with caching
                 async getAllVideos() {
-                    console.log('Fetching dummy videos...');
-                    
-                    // Return dummy videos
-                    return {
-                        success: true,
-                        videos: [
-                            {
-                                id: 'demo1',
-                                title: 'Sample Video 1',
-                                url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-                                uploaded_at: new Date(Date.now() - 3600000).toISOString()
-                            },
-                            {
-                                id: 'demo2',
-                                title: 'Sample Video 2',
-                                url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
-                                uploaded_at: new Date(Date.now() - 7200000).toISOString()
-                            }
-                        ],
-                        count: 2
-                    };
+                    try {
+                        const supabase = window.supabase?.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.key);
+                        if (!supabase) {
+                            return { success: true, videos: [], count: 0 };
+                        }
+
+                        // Cache for 10 seconds
+                        if (window._videoCache && Date.now() - window._videoCache.timestamp < 10000) {
+                            return window._videoCache.data;
+                        }
+
+                        const { data, error } = await supabase
+                            .from('videos')
+                            .select('*')
+                            .order('uploaded_at', { ascending: false })
+                            .limit(50); // Limit for performance
+
+                        if (error) throw error;
+
+                        const result = {
+                            success: true,
+                            videos: data || [],
+                            count: data?.length || 0
+                        };
+
+                        // Cache the result
+                        window._videoCache = {
+                            data: result,
+                            timestamp: Date.now()
+                        };
+
+                        return result;
+
+                    } catch (error) {
+                        console.error('Fetch error:', error);
+                        return {
+                            success: true,
+                            videos: [],
+                            count: 0,
+                            error: error.message
+                        };
+                    }
                 }
             };
-            
-            console.log('Dummy storage created');
-        }
+
+            console.log('Storage initialized');
+        });
     </script>
     
-    <!-- Now load the main script -->
-    <script src="script.js"></script>
+    <!-- Load main script -->
+    <script src="script.js" defer></script>
 </body>
 </html>

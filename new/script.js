@@ -1,280 +1,289 @@
-// DOM Elements
-const warningModal = document.getElementById('warningModal');
-const mainApp = document.getElementById('mainApp');
-const acceptBtn = document.getElementById('acceptBtn');
-const declineBtn = document.getElementById('declineBtn');
-const openUploadModal = document.getElementById('openUploadModal');
-const uploadModal = document.getElementById('uploadModal');
-const closeUploadModal = document.getElementById('closeUploadModal');
-const cancelUpload = document.getElementById('cancelUpload');
-const uploadArea = document.getElementById('uploadArea');
-const videoInput = document.getElementById('videoInput');
-const uploadBtn = document.getElementById('uploadBtn');
-const videoTitle = document.getElementById('videoTitle');
-const uploadProgress = document.getElementById('uploadProgress');
-const progressFill = document.getElementById('progressFill');
-const progressText = document.getElementById('progressText');
-const fileInfo = document.getElementById('fileInfo');
-const videoGrid = document.getElementById('videoGrid');
-const videoCount = document.getElementById('videoCount');
-const videoModal = document.getElementById('videoModal');
-const videoPlayer = document.getElementById('videoPlayer');
-const closeVideoModal = document.getElementById('closeVideoModal');
-const modalVideoTitle = document.getElementById('modalVideoTitle');
-const modalUploadTime = document.getElementById('modalUploadTime');
-const copyLinkBtn = document.getElementById('copyLinkBtn');
+// Fast DOM elements cache
+let elements = {};
+const elementIds = [
+    'warningModal', 'mainApp', 'acceptBtn', 'declineBtn',
+    'openUploadModal', 'uploadModal', 'closeUploadModal', 'cancelUpload',
+    'uploadArea', 'videoInput', 'uploadBtn', 'videoTitle',
+    'uploadProgress', 'progressFill', 'progressText', 'fileInfo',
+    'videoGrid', 'videoCount', 'videoModal', 'videoPlayer',
+    'closeVideoModal', 'modalVideoTitle', 'modalUploadTime', 'copyLinkBtn',
+    'videoLoading'
+];
 
 // State
 let currentVideoFile = null;
 let currentPlayingVideo = null;
+let isLoading = false;
+let videoCache = new Map();
 
-// Wait for storage to be initialized
-async function waitForStorage() {
-    return new Promise((resolve) => {
-        const check = () => {
-            if (window.storage) {
-                console.log('Storage found:', window.storage);
-                resolve(window.storage);
-            } else {
-                console.log('Waiting for storage...');
-                setTimeout(check, 100);
-            }
-        };
-        check();
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+    console.time('App init');
+    
+    // Cache DOM elements
+    elements = {};
+    elementIds.forEach(id => {
+        elements[id] = document.getElementById(id);
+    });
+    
+    // Setup event listeners
+    setupEventListeners();
+    
+    console.timeEnd('App init');
+    console.log('App initialized');
+});
+
+// Event listeners setup
+function setupEventListeners() {
+    // Warning modal
+    elements.acceptBtn?.addEventListener('click', handleAccept);
+    elements.declineBtn?.addEventListener('click', () => {
+        window.location.href = 'https://fwrobby.site';
+    });
+    
+    // Upload modal
+    elements.openUploadModal?.addEventListener('click', () => {
+        showModal(elements.uploadModal);
+        resetUploadUI();
+    });
+    
+    elements.closeUploadModal?.addEventListener('click', () => {
+        hideModal(elements.uploadModal);
+        resetUploadUI();
+    });
+    
+    elements.cancelUpload?.addEventListener('click', () => {
+        hideModal(elements.uploadModal);
+        resetUploadUI();
+    });
+    
+    // File upload
+    elements.uploadArea?.addEventListener('click', () => {
+        elements.videoInput?.click();
+    });
+    
+    elements.videoInput?.addEventListener('change', (e) => {
+        handleFileSelection(e.target.files[0]);
+    });
+    
+    // Drag and drop
+    setupDragAndDrop();
+    
+    // Upload button
+    elements.uploadBtn?.addEventListener('click', handleUpload);
+    
+    // Video player
+    elements.closeVideoModal?.addEventListener('click', closeVideoPlayer);
+    elements.videoModal?.addEventListener('click', (e) => {
+        if (e.target === elements.videoModal) closeVideoPlayer();
+    });
+    
+    elements.copyLinkBtn?.addEventListener('click', copyVideoLink);
+    
+    // Video player events for better UX
+    elements.videoPlayer?.addEventListener('loadeddata', () => {
+        hideLoading(elements.videoLoading);
+    });
+    
+    elements.videoPlayer?.addEventListener('waiting', () => {
+        showLoading(elements.videoLoading);
+    });
+    
+    elements.videoPlayer?.addEventListener('playing', () => {
+        hideLoading(elements.videoLoading);
     });
 }
 
-// Warning Modal Logic
-acceptBtn.addEventListener('click', async () => {
-    warningModal.style.display = 'none';
-    mainApp.classList.remove('hidden');
+// Drag and drop setup
+function setupDragAndDrop() {
+    if (!elements.uploadArea) return;
     
-    // Wait for storage to be ready before loading videos
+    ['dragover', 'dragleave', 'drop'].forEach(eventName => {
+        elements.uploadArea.addEventListener(eventName, (e) => {
+            e.preventDefault();
+        });
+    });
+    
+    elements.uploadArea.addEventListener('dragover', () => {
+        elements.uploadArea.style.borderColor = 'var(--accent-color)';
+        elements.uploadArea.style.background = '#222';
+    });
+    
+    elements.uploadArea.addEventListener('dragleave', () => {
+        elements.uploadArea.style.borderColor = 'var(--border-color)';
+        elements.uploadArea.style.background = 'var(--bg-tertiary)';
+    });
+    
+    elements.uploadArea.addEventListener('drop', (e) => {
+        elements.uploadArea.style.borderColor = 'var(--border-color)';
+        elements.uploadArea.style.background = 'var(--bg-tertiary)';
+        
+        const file = e.dataTransfer.files[0];
+        if (file) handleFileSelection(file);
+    });
+}
+
+// Handle accept button
+async function handleAccept() {
+    hideModal(elements.warningModal);
+    showElement(elements.mainApp);
+    
+    // Load videos with skeleton
+    elements.videoGrid.innerHTML = `
+        <div class="video-card skeleton" style="height: 200px;"></div>
+        <div class="video-card skeleton" style="height: 200px;"></div>
+        <div class="video-card skeleton" style="height: 200px;"></div>
+    `;
+    
     try {
-        const storage = await waitForStorage();
-        await loadVideosFromSupabase(storage);
+        await loadVideosFromSupabase();
     } catch (error) {
         console.error('Failed to load videos:', error);
-        videoGrid.innerHTML = `
-            <div class="loading" style="grid-column: 1/-1;">
-                <i class="fas fa-exclamation-triangle"></i>
-                <p>Error: Failed to connect to server</p>
-                <p style="font-size: 0.8rem; margin-top: 1rem; color: #666;">
-                    Please refresh the page
-                </p>
-            </div>
-        `;
-        showNotification('Failed to connect to server', 'error');
+        showNotification('Failed to load videos', 'error');
     }
-});
+}
 
-declineBtn.addEventListener('click', () => {
-    window.location.href = 'https://fwrobby.site';
-});
-
-// Upload Modal Logic
-openUploadModal.addEventListener('click', () => {
-    uploadModal.classList.remove('hidden');
-    resetUploadUI();
-});
-
-closeUploadModal.addEventListener('click', () => {
-    uploadModal.classList.add('hidden');
-    resetUploadUI();
-});
-
-cancelUpload.addEventListener('click', () => {
-    uploadModal.classList.add('hidden');
-    resetUploadUI();
-});
-
-// File Upload Logic
-uploadArea.addEventListener('click', () => {
-    videoInput.click();
-});
-
-videoInput.addEventListener('change', (e) => {
-    handleFileSelection(e.target.files[0]);
-});
-
-uploadArea.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    uploadArea.style.borderColor = '#444';
-    uploadArea.style.background = '#252525';
-});
-
-uploadArea.addEventListener('dragleave', () => {
-    uploadArea.style.borderColor = '#333';
-    uploadArea.style.background = '#222';
-});
-
-uploadArea.addEventListener('drop', (e) => {
-    e.preventDefault();
-    uploadArea.style.borderColor = '#333';
-    uploadArea.style.background = '#222';
-    
-    const file = e.dataTransfer.files[0];
-    if (file) {
-        handleFileSelection(file);
-    }
-});
-
+// Handle file selection
 function handleFileSelection(file) {
     if (!file) return;
     
+    // Quick validation
+    if (!file.type.startsWith('video/')) {
+        showNotification('Please select a video file', 'error');
+        return;
+    }
+    
+    if (file.size > 30 * 1024 * 1024) {
+        showNotification('File too large (max 30MB)', 'error');
+        return;
+    }
+    
     currentVideoFile = file;
     
-    // Display file info
-    fileInfo.innerHTML = `
-        <div style="display: flex; align-items: center; gap: 0.5rem;">
-            <i class="fas fa-file-video" style="color: #666;"></i>
+    // Update UI
+    elements.fileInfo.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <i class="fas fa-check-circle" style="color: var(--success-color);"></i>
             <div style="flex: 1;">
-                <div style="color: #e0e0e0; margin-bottom: 0.2rem;">${file.name}</div>
-                <div style="color: #666; font-size: 0.85rem;">
-                    ${formatBytes(file.size)} • ${file.type}
+                <div style="color: var(--text-primary); font-size: 14px; font-weight: 500;">
+                    ${truncateText(file.name, 30)}
+                </div>
+                <div style="color: var(--text-secondary); font-size: 12px;">
+                    ${formatBytes(file.size)}
                 </div>
             </div>
-            <button id="removeFileBtn" style="background: none; border: none; color: #666; cursor: pointer;">
+            <button onclick="removeSelectedFile()" style="background: none; border: none; color: var(--text-secondary); cursor: pointer; padding: 4px;">
                 <i class="fas fa-times"></i>
             </button>
         </div>
     `;
     
-    // Add remove file button event
-    document.getElementById('removeFileBtn').addEventListener('click', (e) => {
-        e.stopPropagation();
-        resetFileSelection();
-    });
-    
-    // Enable upload button
-    uploadBtn.disabled = false;
+    elements.uploadBtn.disabled = false;
 }
 
-function resetFileSelection() {
+// Remove selected file
+window.removeSelectedFile = function() {
     currentVideoFile = null;
-    videoInput.value = '';
-    fileInfo.innerHTML = '';
-    uploadBtn.disabled = true;
-}
+    elements.videoInput.value = '';
+    elements.fileInfo.innerHTML = '';
+    elements.uploadBtn.disabled = true;
+};
 
-// Real Upload to Supabase
-uploadBtn.addEventListener('click', async () => {
-    if (!currentVideoFile) return;
+// Handle upload
+async function handleUpload() {
+    if (!currentVideoFile || isLoading) return;
     
-    // Disable upload button during upload
-    uploadBtn.disabled = true;
-    uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
-    
-    // Show progress
-    uploadProgress.classList.remove('hidden');
+    isLoading = true;
+    elements.uploadBtn.disabled = true;
+    elements.uploadBtn.innerHTML = '<span class="spinner"></span> Uploading...';
+    showElement(elements.uploadProgress);
     
     try {
-        // Wait for storage if not ready
-        const storage = await waitForStorage();
+        const storage = window.storage;
+        if (!storage) throw new Error('Storage not available');
         
-        if (!storage || typeof storage.uploadVideo !== 'function') {
-            throw new Error('Storage system not initialized');
-        }
-        
-        // Upload to Supabase
         const result = await storage.uploadVideo(
             currentVideoFile,
-            videoTitle.value || '',
+            elements.videoTitle.value || '',
             (progress) => {
-                progressFill.style.width = `${progress}%`;
-                progressText.textContent = `${progress}%`;
+                elements.progressFill.style.width = `${progress}%`;
+                elements.progressText.textContent = `${progress}%`;
             }
         );
         
-        console.log('Upload result:', result);
-        
         if (result.success) {
-            showNotification('Video uploaded anonymously!', 'success');
-            
-            // Close upload modal
-            uploadModal.classList.add('hidden');
+            showNotification('Video uploaded!', 'success');
+            hideModal(elements.uploadModal);
             resetUploadUI();
             
-            // Reload videos
-            await loadVideosFromSupabase(storage);
+            // Invalidate cache and reload
+            window._videoCache = null;
+            await loadVideosFromSupabase();
             
-            // Auto-play the uploaded video
             if (result.video) {
-                playVideoInModal(result.video);
+                await playVideoInModal(result.video);
             }
         } else {
-            throw new Error(result.error || 'Upload failed');
+            throw new Error(result.error);
         }
     } catch (error) {
         console.error('Upload error:', error);
         showNotification(`Upload failed: ${error.message}`, 'error');
-        uploadBtn.disabled = false;
-        uploadBtn.innerHTML = '<i class="fas fa-upload"></i> Upload Anonymously';
+    } finally {
+        isLoading = false;
+        elements.uploadBtn.disabled = false;
+        elements.uploadBtn.innerHTML = '<i class="fas fa-upload"></i> Upload';
     }
-});
+}
 
+// Reset upload UI
 function resetUploadUI() {
-    resetFileSelection();
-    videoTitle.value = '';
-    uploadProgress.classList.add('hidden');
-    progressFill.style.width = '0%';
-    progressText.textContent = '0%';
-    uploadBtn.disabled = true;
-    uploadBtn.innerHTML = '<i class="fas fa-upload"></i> Upload Anonymously';
+    removeSelectedFile();
+    elements.videoTitle.value = '';
+    hideElement(elements.uploadProgress);
+    elements.progressFill.style.width = '0%';
+    elements.progressText.textContent = '0%';
 }
 
 // Load videos from Supabase
-async function loadVideosFromSupabase(storage) {
-    console.log('Loading videos from Supabase...');
+async function loadVideosFromSupabase() {
+    if (isLoading) return;
     
-    videoGrid.innerHTML = `
-        <div class="loading" style="grid-column: 1/-1;">
-            <i class="fas fa-spinner fa-spin"></i>
-            <p>Loading private videos...</p>
-        </div>
-    `;
+    isLoading = true;
+    elements.videoCount.textContent = 'Loading...';
     
     try {
-        if (!storage) {
-            storage = await waitForStorage();
-        }
+        const storage = window.storage;
+        if (!storage) throw new Error('Storage not available');
         
         const result = await storage.getAllVideos();
-        console.log('Load result:', result);
         
         if (result.success) {
             displayVideos(result.videos);
-            videoCount.textContent = `${result.count || result.videos.length} videos`;
+            elements.videoCount.textContent = `${result.count} videos`;
+            videoCache.clear(); // Clear old cache
         } else {
-            displayVideos(result.videos || []);
-            videoCount.textContent = `${result.videos?.length || 0} videos`;
-            
-            if (result.error) {
-                console.warn('Load warning:', result.error);
-            }
+            throw new Error(result.error);
         }
     } catch (error) {
         console.error('Load error:', error);
-        videoGrid.innerHTML = `
-            <div class="loading" style="grid-column: 1/-1;">
+        elements.videoGrid.innerHTML = `
+            <div class="loading">
                 <i class="fas fa-exclamation-triangle"></i>
-                <p>Error loading videos</p>
-                <p style="font-size: 0.8rem; margin-top: 1rem; color: #666;">
-                    Please check your internet connection
-                </p>
+                <p>Failed to load videos</p>
             </div>
         `;
-        videoCount.textContent = 'Error';
+        elements.videoCount.textContent = 'Error';
+    } finally {
+        isLoading = false;
     }
 }
 
+// Display videos
 function displayVideos(videos) {
-    videoGrid.innerHTML = '';
-    videoCount.textContent = `${videos.length} videos`;
-    
-    if (videos.length === 0) {
-        videoGrid.innerHTML = `
-            <div class="loading" style="grid-column: 1/-1;">
+    if (!videos || videos.length === 0) {
+        elements.videoGrid.innerHTML = `
+            <div class="loading">
                 <i class="fas fa-video-slash"></i>
                 <p>No videos yet. Upload the first one!</p>
             </div>
@@ -282,12 +291,20 @@ function displayVideos(videos) {
         return;
     }
     
+    // Use DocumentFragment for better performance
+    const fragment = document.createDocumentFragment();
+    
     videos.forEach(video => {
         const videoElement = createVideoCard(video);
-        videoGrid.appendChild(videoElement);
+        fragment.appendChild(videoElement);
+        videoCache.set(video.id, video); // Cache video
     });
+    
+    elements.videoGrid.innerHTML = '';
+    elements.videoGrid.appendChild(fragment);
 }
 
+// Create video card
 function createVideoCard(video) {
     const card = document.createElement('div');
     card.className = 'video-card';
@@ -300,10 +317,10 @@ function createVideoCard(video) {
             <i class="fas fa-play"></i>
         </div>
         <div class="video-info">
-            <h3>${video.title}</h3>
+            <h3>${truncateText(video.title, 40)}</h3>
             <div class="video-meta">
                 <span><i class="fas fa-clock"></i> ${timeAgo}</span>
-                <span><i class="fas fa-user-secret"></i> Anonymous</span>
+                <span><i class="fas fa-user-secret"></i> Anon</span>
                 <button class="btn-small play-btn">
                     <i class="fas fa-play"></i> Play
                 </button>
@@ -311,84 +328,74 @@ function createVideoCard(video) {
         </div>
     `;
     
-    // Add click events
-    const playBtn = card.querySelector('.play-btn');
-    const thumbnail = card.querySelector('.video-thumbnail');
-    const title = card.querySelector('h3');
+    // Add click events with debouncing
+    const playVideo = debounce(() => playVideoInModal(video), 300);
     
-    const playVideo = () => {
-        playVideoInModal(video);
-    };
-    
-    playBtn.addEventListener('click', playVideo);
-    thumbnail.addEventListener('click', playVideo);
-    title.addEventListener('click', playVideo);
+    card.addEventListener('click', playVideo, { passive: true });
+    card.querySelector('.play-btn').addEventListener('click', playVideo);
     
     return card;
 }
 
-// Video Player Modal Functions
-function playVideoInModal(video) {
+// Play video in modal
+async function playVideoInModal(video) {
     try {
-        // Set current playing video
         currentPlayingVideo = video;
         
-        // Set video source
-        videoPlayer.src = video.url;
-        videoPlayer.load();
+        // Update UI immediately
+        elements.modalVideoTitle.textContent = truncateText(video.title, 60);
+        elements.modalUploadTime.textContent = getTimeAgo(video.uploaded_at);
         
-        // Update modal info
-        modalVideoTitle.textContent = video.title;
-        modalUploadTime.textContent = getTimeAgo(video.uploaded_at);
+        // Show modal with loading
+        showModal(elements.videoModal);
+        showLoading(elements.videoLoading);
         
-        // Update copy link button
-        copyLinkBtn.onclick = () => copyVideoLink(video.url);
+        // Set video source with preload
+        elements.videoPlayer.src = video.url;
+        elements.videoPlayer.load();
         
-        // Show modal
-        videoModal.classList.remove('hidden');
-        
-        // Play video
-        videoPlayer.play().catch(e => {
-            console.log('Autoplay prevented:', e);
-            showNotification('Click the play button to start video', 'info');
-        });
+        // Try to play
+        const playPromise = elements.videoPlayer.play();
+        if (playPromise !== undefined) {
+            playPromise.catch(() => {
+                // Autoplay prevented, video will play when user clicks
+                hideLoading(elements.videoLoading);
+            });
+        }
         
     } catch (error) {
         console.error('Play error:', error);
         showNotification('Failed to play video', 'error');
+        hideLoading(elements.videoLoading);
     }
 }
 
-function copyVideoLink(url) {
-    navigator.clipboard.writeText(url)
+// Copy video link
+function copyVideoLink() {
+    if (!currentPlayingVideo?.url) return;
+    
+    navigator.clipboard.writeText(currentPlayingVideo.url)
         .then(() => {
-            showNotification('Video link copied', 'success');
+            showNotification('Link copied', 'success');
         })
         .catch(err => {
             console.error('Copy failed:', err);
-            showNotification('Failed to copy link', 'error');
+            showNotification('Failed to copy', 'error');
         });
 }
 
-closeVideoModal.addEventListener('click', () => {
-    closeVideoPlayer();
-});
-
-videoModal.addEventListener('click', (e) => {
-    if (e.target === videoModal) {
-        closeVideoPlayer();
-    }
-});
-
+// Close video player
 function closeVideoPlayer() {
-    videoModal.classList.add('hidden');
-    videoPlayer.pause();
-    videoPlayer.src = '';
+    hideModal(elements.videoModal);
+    if (elements.videoPlayer) {
+        elements.videoPlayer.pause();
+        elements.videoPlayer.src = '';
+    }
     currentPlayingVideo = null;
 }
 
-// Utility Functions
-function formatBytes(bytes, decimals = 2) {
+// Utility functions
+function formatBytes(bytes, decimals = 1) {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
     const dm = decimals < 0 ? 0 : decimals;
@@ -405,47 +412,75 @@ function getTimeAgo(dateString) {
         const now = new Date();
         const seconds = Math.floor((now - date) / 1000);
         
-        let interval = Math.floor(seconds / 2592000);
-        if (interval >= 1) return interval + "mo ago";
-        
-        interval = Math.floor(seconds / 86400);
-        if (interval >= 1) return interval + "d ago";
-        
-        interval = Math.floor(seconds / 3600);
-        if (interval >= 1) return interval + "h ago";
-        
-        interval = Math.floor(seconds / 60);
-        if (interval >= 1) return interval + "m ago";
-        
-        return "just now";
-    } catch (error) {
+        if (seconds < 60) return "just now";
+        if (seconds < 3600) return Math.floor(seconds / 60) + "m ago";
+        if (seconds < 86400) return Math.floor(seconds / 3600) + "h ago";
+        if (seconds < 2592000) return Math.floor(seconds / 86400) + "d ago";
+        return Math.floor(seconds / 2592000) + "mo ago";
+    } catch {
         return "recently";
     }
 }
 
+function truncateText(text, maxLength) {
+    return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+}
+
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+// Modal helpers
+function showModal(modal) {
+    if (modal) {
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+function hideModal(modal) {
+    if (modal) {
+        modal.classList.add('hidden');
+        document.body.style.overflow = '';
+    }
+}
+
+function showElement(element) {
+    if (element) element.classList.remove('hidden');
+}
+
+function hideElement(element) {
+    if (element) element.classList.add('hidden');
+}
+
+function showLoading(element) {
+    if (element) {
+        element.style.display = 'block';
+        element.classList.add('skeleton');
+    }
+}
+
+function hideLoading(element) {
+    if (element) {
+        element.style.display = 'none';
+        element.classList.remove('skeleton');
+    }
+}
+
+// Notification system
 function showNotification(message, type = 'info') {
-    const colors = {
-        success: '#333',
-        error: '#222',
-        info: '#222'
-    };
-    
-    const borderColors = {
-        success: '#444',
-        error: '#333',
-        info: '#333'
-    };
-    
-    const icon = {
-        success: 'fa-check',
-        error: 'fa-exclamation-circle',
-        info: 'fa-info-circle'
-    }[type];
-    
     const notification = document.createElement('div');
     notification.className = `notification ${type}`;
     notification.innerHTML = `
-        <i class="fas ${icon}" style="color: #666;"></i>
+        <i class="fas ${type === 'success' ? 'fa-check' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
         <div>${message}</div>
     `;
     
@@ -454,18 +489,22 @@ function showNotification(message, type = 'info') {
     
     document.body.appendChild(notification);
     
+    // Auto remove
     setTimeout(() => {
-        notification.style.animation = 'slideOut 0.3s ease';
-        setTimeout(() => {
-            if (notification.parentNode) {
-                document.body.removeChild(notification);
-            }
-        }, 300);
+        if (notification.parentNode) {
+            notification.style.animation = 'slideOut 0.2s ease';
+            setTimeout(() => notification.remove(), 200);
+        }
     }, 3000);
 }
 
-// Initialize on load
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('Private Videos initialized');
-    console.log('Window storage available:', window.storage);
+// Handle back button for modals
+window.addEventListener('popstate', () => {
+    if (!elements.videoModal.classList.contains('hidden')) {
+        closeVideoPlayer();
+    }
+    if (!elements.uploadModal.classList.contains('hidden')) {
+        hideModal(elements.uploadModal);
+        resetUploadUI();
+    }
 });
