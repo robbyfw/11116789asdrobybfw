@@ -1,1 +1,133 @@
-Working on it.
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VidShare - Anonymous Video Hosting</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Warning Modal -->
+    <div id="warningModal" class="modal">
+        <div class="modal-content">
+            <div class="warning-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h2>⚠️ WARNING: Content Advisory</h2>
+            <div class="warning-text">
+                <p><strong>OPEN THIS PAGE AT YOUR OWN RISK!</strong></p>
+                <p>This website hosts user-uploaded content anonymously. Content may include:</p>
+                <ul>
+                    <li>Graphic or violent material</li>
+                    <li>Unfiltered user-generated videos</li>
+                    <li>Potentially disturbing content</li>
+                </ul>
+                <p>No registration required. All uploads are anonymous.</p>
+                <p>By clicking "ACCEPT", you acknowledge that you're 18+ and agree to view potentially disturbing content.</p>
+            </div>
+            <div class="modal-buttons">
+                <button id="acceptBtn" class="btn btn-accept">
+                    <i class="fas fa-check"></i> ACCEPT & ENTER
+                </button>
+                <button id="declineBtn" class="btn btn-decline">
+                    <i class="fas fa-times"></i> DECLINE & EXIT
+                </button>
+            </div>
+            <p class="warning-note">If you decline, you will be redirected to a safe website.</p>
+        </div>
+    </div>
+
+    <!-- Main App (Hidden initially) -->
+    <div id="mainApp" class="hidden">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-video"></i>
+                <h1>VidShare</h1>
+                <span class="tagline">Anonymous Video Hosting</span>
+            </div>
+            <div class="upload-info">
+                <p><i class="fas fa-user-secret"></i> Completely Anonymous</p>
+                <p><i class="fas fa-upload"></i> No Registration Required</p>
+            </div>
+        </header>
+
+        <!-- Upload Section -->
+        <div class="upload-section">
+            <div class="upload-area" id="uploadArea">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <h3>Drop video here or click to upload</h3>
+                <p>MP4, WebM, or MOV up to 100MB</p>
+                <input type="file" id="videoInput" accept="video/*" hidden>
+                <button id="selectFileBtn" class="btn btn-upload">
+                    <i class="fas fa-file-video"></i> Select Video
+                </button>
+                <div class="upload-progress hidden" id="uploadProgress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <span id="progressText">0%</span>
+                </div>
+            </div>
+            
+            <div class="upload-controls">
+                <div class="title-input">
+                    <input type="text" id="videoTitle" placeholder="Optional title (or leave blank for random)">
+                </div>
+                <button id="uploadBtn" class="btn btn-submit" disabled>
+                    <i class="fas fa-upload"></i> Upload Anonymously
+                </button>
+            </div>
+        </div>
+
+        <!-- Video Grid -->
+        <main class="video-grid-container">
+            <div class="section-title">
+                <h2><i class="fas fa-play-circle"></i> Recently Uploaded Videos</h2>
+                <div class="video-count" id="videoCount">0 videos</div>
+            </div>
+            
+            <div class="video-grid" id="videoGrid">
+                <!-- Videos will be loaded here -->
+                <div class="loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Loading videos...</p>
+                </div>
+            </div>
+        </main>
+
+        <!-- Video Modal -->
+        <div id="videoModal" class="modal hidden">
+            <div class="modal-content video-modal">
+                <button class="close-modal" id="closeModal">
+                    <i class="fas fa-times"></i>
+                </button>
+                <div class="video-player-container">
+                    <video id="videoPlayer" controls>
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+                <div class="video-info">
+                    <h3 id="modalVideoTitle">Untitled Video</h3>
+                    <div class="video-meta">
+                        <span><i class="fas fa-clock"></i> <span id="modalUploadTime">Just now</span></span>
+                        <span><i class="fas fa-eye"></i> <span id="modalViewCount">0</span> views</span>
+                        <button id="copyLinkBtn" class="btn btn-small">
+                            <i class="fas fa-link"></i> Copy Link
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p><i class="fas fa-exclamation-circle"></i> Warning: This platform hosts anonymous content. Viewer discretion advised.</p>
+            <p class="footer-note">No data stored. Videos are temporary. Built for anonymous sharing.</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
