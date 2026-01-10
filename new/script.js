@@ -124,7 +124,7 @@ function resetFileSelection() {
     uploadBtn.disabled = true;
 }
 
-// Real Upload to Supabase
+// Real Upload to Supabase - FIXED VERSION
 uploadBtn.addEventListener('click', async () => {
     if (!currentVideoFile) return;
     
@@ -136,6 +136,11 @@ uploadBtn.addEventListener('click', async () => {
     uploadProgress.classList.remove('hidden');
     
     try {
+        // Check if storage is defined
+        if (typeof storage === 'undefined') {
+            throw new Error('Storage system not initialized');
+        }
+        
         // Upload to Supabase
         const result = await storage.uploadVideo(
             currentVideoFile,
@@ -145,6 +150,8 @@ uploadBtn.addEventListener('click', async () => {
                 progressText.textContent = `${progress}%`;
             }
         );
+        
+        console.log('Upload result:', result);
         
         if (result.success) {
             showNotification('Video uploaded anonymously!', 'success');
@@ -181,7 +188,7 @@ function resetUploadUI() {
 
 // Load videos from Supabase
 async function loadVideosFromSupabase() {
-    console.log('Loading videos...');
+    console.log('Loading videos from Supabase...');
     
     videoGrid.innerHTML = `
         <div class="loading" style="grid-column: 1/-1;">
@@ -191,6 +198,11 @@ async function loadVideosFromSupabase() {
     `;
     
     try {
+        // Check if storage is defined
+        if (typeof storage === 'undefined') {
+            throw new Error('Storage system not available');
+        }
+        
         const result = await storage.getAllVideos();
         console.log('Load result:', result);
         
@@ -198,20 +210,30 @@ async function loadVideosFromSupabase() {
             displayVideos(result.videos);
             videoCount.textContent = `${result.count || result.videos.length} videos`;
         } else {
-            throw new Error(result.error || 'Failed to load videos');
+            // Even if result.success is false, try to display any videos we got
+            displayVideos(result.videos || []);
+            videoCount.textContent = `${result.videos?.length || 0} videos`;
+            
+            if (result.error) {
+                console.warn('Load warning:', result.error);
+                showNotification('Some videos may not load correctly', 'warning');
+            }
         }
     } catch (error) {
         console.error('Load error:', error);
         videoGrid.innerHTML = `
             <div class="loading" style="grid-column: 1/-1;">
                 <i class="fas fa-exclamation-triangle"></i>
-                <p>Error loading videos: ${error.message}</p>
+                <p>Error loading videos</p>
                 <p style="font-size: 0.8rem; margin-top: 1rem; color: #666;">
-                    Make sure you've run the SQL in Supabase SQL Editor
+                    Please refresh the page or try again later
                 </p>
             </div>
         `;
         videoCount.textContent = 'Error';
+        
+        // Show fallback message
+        showNotification('Failed to load videos', 'error');
     }
 }
 
