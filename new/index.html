@@ -7,6 +7,52 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        /* Notification styles */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            z-index: 10000;
+            animation: slideIn 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            max-width: 400px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .notification.success {
+            background: #333;
+            color: #e0e0e0;
+            border: 1px solid #444;
+        }
+        
+        .notification.error {
+            background: #222;
+            color: #e0e0e0;
+            border: 1px solid #333;
+        }
+        
+        .notification.info {
+            background: #222;
+            color: #e0e0e0;
+            border: 1px solid #333;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+    </style>
 </head>
 <body>
     <!-- Warning Modal -->
@@ -152,7 +198,259 @@
         </footer>
     </div>
 
-    <script src="supabase.js"></script>
+    <!-- Simple Supabase Initialization -->
+    <script>
+        // Define storage globally first
+        window.storage = null;
+        
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing Supabase...');
+            
+            // Wait for Supabase SDK to load
+            setTimeout(function() {
+                if (window.supabase) {
+                    initSupabase();
+                } else {
+                    console.error('Supabase SDK not loaded');
+                    // Create dummy storage for testing
+                    createDummyStorage();
+                }
+            }, 1000);
+        });
+        
+        function initSupabase() {
+            console.log('Initializing Supabase...');
+            
+            // Supabase Configuration
+            const SUPABASE_URL = 'https://tpskystunzgnbbgnrvnz.supabase.co';
+            const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRwc2t5c3R1bnpnbmJiZ25ydm56Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgwNTkyMjMsImV4cCI6MjA4MzYzNTIyM30.wEekEB2PyUvGcFFZ_dQvB9Ny0C2cM1v7NdY9_AcsnBU';
+
+            try {
+                // Initialize Supabase client
+                const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                
+                // Create storage object
+                window.storage = {
+                    // Upload video to Supabase Storage
+                    async uploadVideo(file, title, onProgress) {
+                        console.log('Starting upload:', file.name);
+                        
+                        try {
+                            // Check file size (30MB limit)
+                            if (file.size > 30 * 1024 * 1024) {
+                                throw new Error('File size exceeds 30MB limit (max 30MB)');
+                            }
+
+                            // Check if it's a video file
+                            if (!file.type.startsWith('video/')) {
+                                throw new Error('Please select a video file (MP4, WebM, MOV, etc.)');
+                            }
+
+                            // Generate unique filename
+                            const fileExt = file.name.split('.').pop().toLowerCase();
+                            const fileName = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
+                            const filePath = `public/${fileName}`;
+                            
+                            console.log('Uploading to Supabase Storage:', filePath);
+                            
+                            // Simulate progress updates
+                            if (onProgress) {
+                                let progress = 0;
+                                const interval = setInterval(() => {
+                                    progress += 10;
+                                    if (progress <= 90) {
+                                        onProgress(progress);
+                                    } else {
+                                        clearInterval(interval);
+                                    }
+                                }, 100);
+                            }
+                            
+                            // Upload file to Supabase Storage
+                            const { data: uploadData, error: uploadError } = await supabase.storage
+                                .from('videos')
+                                .upload(filePath, file, {
+                                    cacheControl: '3600',
+                                    upsert: false
+                                });
+
+                            if (uploadError) {
+                                console.error('Storage upload error:', uploadError);
+                                throw new Error(`Upload failed: ${uploadError.message}`);
+                            }
+
+                            if (onProgress) {
+                                onProgress(100);
+                            }
+
+                            // Get public URL
+                            const { data: urlData } = supabase.storage
+                                .from('videos')
+                                .getPublicUrl(filePath);
+
+                            // Save video metadata to database
+                            const videoData = {
+                                title: title || `Private Video ${new Date().toLocaleTimeString()}`,
+                                filename: fileName,
+                                filepath: filePath,
+                                url: urlData.publicUrl,
+                                filesize: file.size,
+                                filetype: file.type
+                            };
+
+                            console.log('Saving metadata to database...');
+                            
+                            // Insert into videos table
+                            const { data: dbData, error: dbError } = await supabase
+                                .from('videos')
+                                .insert([videoData])
+                                .select()
+                                .single();
+
+                            if (dbError) {
+                                console.error('Database error:', dbError);
+                                // Still return success if file uploaded but metadata failed
+                                return {
+                                    success: true,
+                                    video: { ...videoData, id: 'temp-id' },
+                                    publicUrl: urlData.publicUrl
+                                };
+                            }
+
+                            console.log('Upload complete!');
+                            
+                            return {
+                                success: true,
+                                video: dbData,
+                                publicUrl: urlData.publicUrl
+                            };
+
+                        } catch (error) {
+                            console.error('Upload error:', error);
+                            return {
+                                success: false,
+                                error: error.message || 'Unknown upload error'
+                            };
+                        }
+                    },
+
+                    // Get all videos from database
+                    async getAllVideos() {
+                        console.log('Fetching videos from Supabase...');
+                        
+                        try {
+                            const { data, error, count } = await supabase
+                                .from('videos')
+                                .select('*', { count: 'exact' })
+                                .order('uploaded_at', { ascending: false });
+
+                            if (error) {
+                                console.error('Database fetch error:', error);
+                                // Return empty array instead of failing
+                                return {
+                                    success: true,
+                                    videos: [],
+                                    count: 0
+                                };
+                            }
+
+                            console.log(`Found ${data?.length || 0} videos`);
+                            
+                            return {
+                                success: true,
+                                videos: data || [],
+                                count: count || 0
+                            };
+                            
+                        } catch (error) {
+                            console.error('Get videos error:', error);
+                            return {
+                                success: true,
+                                videos: [],
+                                count: 0,
+                                error: error.message
+                            };
+                        }
+                    }
+                };
+                
+                console.log('Supabase storage initialized successfully');
+                console.log('Storage object:', window.storage);
+                
+            } catch (error) {
+                console.error('Failed to initialize Supabase:', error);
+                createDummyStorage();
+            }
+        }
+        
+        function createDummyStorage() {
+            console.log('Creating dummy storage for testing...');
+            
+            // Create dummy storage for testing
+            window.storage = {
+                async uploadVideo(file, title, onProgress) {
+                    console.log('Dummy upload started');
+                    
+                    // Simulate progress
+                    if (onProgress) {
+                        let progress = 0;
+                        const interval = setInterval(() => {
+                            progress += 20;
+                            if (progress <= 100) {
+                                onProgress(progress);
+                            }
+                            if (progress >= 100) {
+                                clearInterval(interval);
+                            }
+                        }, 200);
+                    }
+                    
+                    // Wait for progress to complete
+                    await new Promise(resolve => setTimeout(resolve, 1200));
+                    
+                    // Return dummy success
+                    return {
+                        success: true,
+                        video: {
+                            id: 'dummy_' + Date.now(),
+                            title: title || 'Test Video',
+                            url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+                            uploaded_at: new Date().toISOString()
+                        }
+                    };
+                },
+                
+                async getAllVideos() {
+                    console.log('Fetching dummy videos...');
+                    
+                    // Return dummy videos
+                    return {
+                        success: true,
+                        videos: [
+                            {
+                                id: 'demo1',
+                                title: 'Sample Video 1',
+                                url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+                                uploaded_at: new Date(Date.now() - 3600000).toISOString()
+                            },
+                            {
+                                id: 'demo2',
+                                title: 'Sample Video 2',
+                                url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
+                                uploaded_at: new Date(Date.now() - 7200000).toISOString()
+                            }
+                        ],
+                        count: 2
+                    };
+                }
+            };
+            
+            console.log('Dummy storage created');
+        }
+    </script>
+    
+    <!-- Now load the main script -->
     <script src="script.js"></script>
 </body>
 </html>

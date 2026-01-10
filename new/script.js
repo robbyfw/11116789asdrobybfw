@@ -28,11 +28,44 @@ const copyLinkBtn = document.getElementById('copyLinkBtn');
 let currentVideoFile = null;
 let currentPlayingVideo = null;
 
+// Wait for storage to be initialized
+async function waitForStorage() {
+    return new Promise((resolve) => {
+        const check = () => {
+            if (window.storage) {
+                console.log('Storage found:', window.storage);
+                resolve(window.storage);
+            } else {
+                console.log('Waiting for storage...');
+                setTimeout(check, 100);
+            }
+        };
+        check();
+    });
+}
+
 // Warning Modal Logic
-acceptBtn.addEventListener('click', () => {
+acceptBtn.addEventListener('click', async () => {
     warningModal.style.display = 'none';
     mainApp.classList.remove('hidden');
-    loadVideosFromSupabase();
+    
+    // Wait for storage to be ready before loading videos
+    try {
+        const storage = await waitForStorage();
+        await loadVideosFromSupabase(storage);
+    } catch (error) {
+        console.error('Failed to load videos:', error);
+        videoGrid.innerHTML = `
+            <div class="loading" style="grid-column: 1/-1;">
+                <i class="fas fa-exclamation-triangle"></i>
+                <p>Error: Failed to connect to server</p>
+                <p style="font-size: 0.8rem; margin-top: 1rem; color: #666;">
+                    Please refresh the page
+                </p>
+            </div>
+        `;
+        showNotification('Failed to connect to server', 'error');
+    }
 });
 
 declineBtn.addEventListener('click', () => {
@@ -124,7 +157,7 @@ function resetFileSelection() {
     uploadBtn.disabled = true;
 }
 
-// Real Upload to Supabase - FIXED VERSION
+// Real Upload to Supabase
 uploadBtn.addEventListener('click', async () => {
     if (!currentVideoFile) return;
     
@@ -136,8 +169,10 @@ uploadBtn.addEventListener('click', async () => {
     uploadProgress.classList.remove('hidden');
     
     try {
-        // Check if storage is defined
-        if (typeof storage === 'undefined') {
+        // Wait for storage if not ready
+        const storage = await waitForStorage();
+        
+        if (!storage || typeof storage.uploadVideo !== 'function') {
             throw new Error('Storage system not initialized');
         }
         
@@ -161,10 +196,12 @@ uploadBtn.addEventListener('click', async () => {
             resetUploadUI();
             
             // Reload videos
-            await loadVideosFromSupabase();
+            await loadVideosFromSupabase(storage);
             
             // Auto-play the uploaded video
-            playVideoInModal(result.video);
+            if (result.video) {
+                playVideoInModal(result.video);
+            }
         } else {
             throw new Error(result.error || 'Upload failed');
         }
@@ -187,7 +224,7 @@ function resetUploadUI() {
 }
 
 // Load videos from Supabase
-async function loadVideosFromSupabase() {
+async function loadVideosFromSupabase(storage) {
     console.log('Loading videos from Supabase...');
     
     videoGrid.innerHTML = `
@@ -198,9 +235,8 @@ async function loadVideosFromSupabase() {
     `;
     
     try {
-        // Check if storage is defined
-        if (typeof storage === 'undefined') {
-            throw new Error('Storage system not available');
+        if (!storage) {
+            storage = await waitForStorage();
         }
         
         const result = await storage.getAllVideos();
@@ -210,13 +246,11 @@ async function loadVideosFromSupabase() {
             displayVideos(result.videos);
             videoCount.textContent = `${result.count || result.videos.length} videos`;
         } else {
-            // Even if result.success is false, try to display any videos we got
             displayVideos(result.videos || []);
             videoCount.textContent = `${result.videos?.length || 0} videos`;
             
             if (result.error) {
                 console.warn('Load warning:', result.error);
-                showNotification('Some videos may not load correctly', 'warning');
             }
         }
     } catch (error) {
@@ -226,14 +260,11 @@ async function loadVideosFromSupabase() {
                 <i class="fas fa-exclamation-triangle"></i>
                 <p>Error loading videos</p>
                 <p style="font-size: 0.8rem; margin-top: 1rem; color: #666;">
-                    Please refresh the page or try again later
+                    Please check your internet connection
                 </p>
             </div>
         `;
         videoCount.textContent = 'Error';
-        
-        // Show fallback message
-        showNotification('Failed to load videos', 'error');
     }
 }
 
@@ -283,6 +314,7 @@ function createVideoCard(video) {
     // Add click events
     const playBtn = card.querySelector('.play-btn');
     const thumbnail = card.querySelector('.video-thumbnail');
+    const title = card.querySelector('h3');
     
     const playVideo = () => {
         playVideoInModal(video);
@@ -290,7 +322,7 @@ function createVideoCard(video) {
     
     playBtn.addEventListener('click', playVideo);
     thumbnail.addEventListener('click', playVideo);
-    card.querySelector('h3').addEventListener('click', playVideo);
+    title.addEventListener('click', playVideo);
     
     return card;
 }
@@ -366,23 +398,29 @@ function formatBytes(bytes, decimals = 2) {
 }
 
 function getTimeAgo(dateString) {
-    const date = new Date(dateString);
-    const now = new Date();
-    const seconds = Math.floor((now - date) / 1000);
+    if (!dateString) return "recently";
     
-    let interval = Math.floor(seconds / 2592000);
-    if (interval >= 1) return interval + "mo ago";
-    
-    interval = Math.floor(seconds / 86400);
-    if (interval >= 1) return interval + "d ago";
-    
-    interval = Math.floor(seconds / 3600);
-    if (interval >= 1) return interval + "h ago";
-    
-    interval = Math.floor(seconds / 60);
-    if (interval >= 1) return interval + "m ago";
-    
-    return "just now";
+    try {
+        const date = new Date(dateString);
+        const now = new Date();
+        const seconds = Math.floor((now - date) / 1000);
+        
+        let interval = Math.floor(seconds / 2592000);
+        if (interval >= 1) return interval + "mo ago";
+        
+        interval = Math.floor(seconds / 86400);
+        if (interval >= 1) return interval + "d ago";
+        
+        interval = Math.floor(seconds / 3600);
+        if (interval >= 1) return interval + "h ago";
+        
+        interval = Math.floor(seconds / 60);
+        if (interval >= 1) return interval + "m ago";
+        
+        return "just now";
+    } catch (error) {
+        return "recently";
+    }
 }
 
 function showNotification(message, type = 'info') {
@@ -405,26 +443,7 @@ function showNotification(message, type = 'info') {
     }[type];
     
     const notification = document.createElement('div');
-    notification.className = 'notification';
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: ${colors[type]};
-        color: #e0e0e0;
-        padding: 1rem 1.5rem;
-        border-radius: 8px;
-        border: 1px solid ${borderColors[type]};
-        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        z-index: 10000;
-        animation: slideIn 0.3s ease;
-        display: flex;
-        align-items: center;
-        gap: 0.8rem;
-        max-width: 400px;
-        backdrop-filter: blur(10px);
-    `;
-    
+    notification.className = `notification ${type}`;
     notification.innerHTML = `
         <i class="fas ${icon}" style="color: #666;"></i>
         <div>${message}</div>
@@ -445,22 +464,8 @@ function showNotification(message, type = 'info') {
     }, 3000);
 }
 
-// Add notification styles
-const notificationStyle = document.createElement('style');
-notificationStyle.textContent = `
-    @keyframes slideIn {
-        from { transform: translateX(100%); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
-    }
-    
-    @keyframes slideOut {
-        from { transform: translateX(0); opacity: 1; }
-        to { transform: translateX(100%); opacity: 0; }
-    }
-`;
-document.head.appendChild(notificationStyle);
-
 // Initialize on load
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Private Videos initialized');
+    console.log('Window storage available:', window.storage);
 });
