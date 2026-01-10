@@ -181,6 +181,8 @@ function resetUploadUI() {
 
 // Load videos from Supabase
 async function loadVideosFromSupabase() {
+    console.log('Loading videos...');
+    
     videoGrid.innerHTML = `
         <div class="loading" style="grid-column: 1/-1;">
             <i class="fas fa-spinner fa-spin"></i>
@@ -190,20 +192,26 @@ async function loadVideosFromSupabase() {
     
     try {
         const result = await storage.getAllVideos();
+        console.log('Load result:', result);
         
         if (result.success) {
             displayVideos(result.videos);
+            videoCount.textContent = `${result.count || result.videos.length} videos`;
         } else {
-            throw new Error(result.error);
+            throw new Error(result.error || 'Failed to load videos');
         }
     } catch (error) {
         console.error('Load error:', error);
         videoGrid.innerHTML = `
             <div class="loading" style="grid-column: 1/-1;">
                 <i class="fas fa-exclamation-triangle"></i>
-                <p>Error loading videos</p>
+                <p>Error loading videos: ${error.message}</p>
+                <p style="font-size: 0.8rem; margin-top: 1rem; color: #666;">
+                    Make sure you've run the SQL in Supabase SQL Editor
+                </p>
             </div>
         `;
+        videoCount.textContent = 'Error';
     }
 }
 
